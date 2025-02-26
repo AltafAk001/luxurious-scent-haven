@@ -24,9 +24,9 @@ export function FeaturedProducts() {
   ];
 
   return (
-    <section className="py-16">
+    <section className="py-8 md:py-16">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {products.map((product) => (
             <div
               key={product.id}
@@ -39,8 +39,8 @@ export function FeaturedProducts() {
                   className="w-full h-full object-cover transform group-hover:scale-105 duration-500"
                 />
               </div>
-              <div className="absolute inset-0 bg-primary-dark/20 group-hover:bg-primary-dark/40 duration-300 flex items-end p-6">
-                <h3 className="text-h3 text-white">{product.name}</h3>
+              <div className="absolute inset-0 bg-primary-dark/20 group-hover:bg-primary-dark/40 duration-300 flex items-end p-4 md:p-6">
+                <h3 className="text-h4 md:text-h3 text-white">{product.name}</h3>
               </div>
             </div>
           ))}

@@ -1,11 +1,14 @@
 
-import { ShoppingBag, User, Search } from "lucide-react";
+import { ShoppingBag, User, Search, Menu } from "lucide-react";
+import { useState } from "react";
 
 export function Navigation() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <>
-      <div className="bg-primary-dark text-white text-center py-2 text-subtitle-2">
-        FREE SHIPPING WITHIN THE UK IF THE TOTAL ORDER IS OVER £80.00
+      <div className="bg-primary-dark text-white text-center py-2 text-subtitle-2 px-4">
+        <p className="line-clamp-1">FREE SHIPPING WITHIN THE UK IF THE TOTAL ORDER IS OVER £80.00</p>
       </div>
       <nav className="bg-primary-dark sticky top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4">
@@ -14,7 +17,7 @@ export function Navigation() {
               SCENT HAVEN
             </a>
             
-            <div className="flex-1 max-w-xl px-8">
+            <div className="hidden md:block flex-1 max-w-xl px-8">
               <div className="relative">
                 <input
                   type="text"
@@ -28,7 +31,7 @@ export function Navigation() {
             </div>
 
             <div className="flex items-center space-x-6">
-              <button className="text-white hover:text-primary-accent duration-200">
+              <button className="hidden md:block text-white hover:text-primary-accent duration-200">
                 <User size={20} />
               </button>
               <button className="text-white hover:text-primary-accent duration-200 relative">
@@ -37,14 +40,20 @@ export function Navigation() {
                   0
                 </span>
               </button>
-              <button className="text-white text-button-lg">
+              <button className="hidden md:block text-white text-button-lg">
                 EN
+              </button>
+              <button 
+                className="md:hidden text-white"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                <Menu size={24} />
               </button>
             </div>
           </div>
           
-          <div className="border-t border-white/10">
-            <div className="flex space-x-8 py-3">
+          <div className={`border-t border-white/10 ${isMobileMenuOpen ? 'block' : 'hidden md:block'}`}>
+            <div className="flex flex-col md:flex-row md:space-x-8 space-y-2 md:space-y-0 py-3 overflow-x-auto">
               <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">NEW ARRIVALS</a>
               <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">BRANDS</a>
               <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">SCENTS</a>

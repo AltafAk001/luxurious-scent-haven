@@ -12,8 +12,8 @@ export function BrandBar() {
   ];
 
   return (
-    <div className="py-8 border-b border-secondary overflow-hidden">
-      <div className="flex space-x-12 justify-center items-center animate-fade-in">
+    <div className="py-6 md:py-8 border-b border-secondary overflow-hidden">
+      <div className="flex flex-wrap justify-center gap-4 md:gap-8 lg:gap-12 px-4 animate-fade-in">
         {brands.map((brand) => (
           <span
             key={brand}

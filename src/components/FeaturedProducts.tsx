@@ -39,8 +39,8 @@ export function FeaturedProducts() {
                   className="w-full h-full object-cover transform group-hover:scale-105 duration-500"
                 />
               </div>
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 duration-300 flex items-end p-6">
-                <h3 className="text-white text-lg font-medium">{product.name}</h3>
+              <div className="absolute inset-0 bg-primary-dark/20 group-hover:bg-primary-dark/40 duration-300 flex items-end p-6">
+                <h3 className="text-h3 text-white">{product.name}</h3>
               </div>
             </div>
           ))}

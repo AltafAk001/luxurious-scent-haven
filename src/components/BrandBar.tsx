@@ -12,12 +12,12 @@ export function BrandBar() {
   ];
 
   return (
-    <div className="py-8 border-b overflow-hidden">
+    <div className="py-8 border-b border-secondary overflow-hidden">
       <div className="flex space-x-12 justify-center items-center animate-fade-in">
         {brands.map((brand) => (
           <span
             key={brand}
-            className="text-sm text-gray-600 whitespace-nowrap hover:text-accent duration-200 cursor-pointer"
+            className="text-button-lg text-secondary-medium whitespace-nowrap hover:text-primary-accent duration-200 cursor-pointer"
           >
             {brand}
           </span>

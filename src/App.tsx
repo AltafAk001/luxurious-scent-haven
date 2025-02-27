@@ -4,6 +4,7 @@ import { Navigation } from "./components/Navigation";
 import { Footer } from "./components/Footer";
 import Index from "./pages/Index";
 import ProductPage from "./pages/ProductPage";
+import ProductListingPage from "./pages/ProductListingPage";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -15,6 +16,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/products" element={<ProductListingPage />} />
+            <Route path="/perfumes" element={<ProductListingPage />} />
+            <Route path="/best-sellers" element={<ProductListingPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

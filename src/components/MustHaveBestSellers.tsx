@@ -15,6 +15,7 @@ export function MustHaveBestSellers() {
       brand: "TOM FORD",
       price: 140.00,
       image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?ixlib=rb-4.0.3",
+      gender: "FOR MEN",
     },
     {
       id: 2,
@@ -22,6 +23,7 @@ export function MustHaveBestSellers() {
       brand: "GUCCI",
       price: 105.00,
       image: "https://images.unsplash.com/photo-1541643600914-78b084683601?ixlib=rb-4.0.3",
+      gender: "FOR WOMEN",
     },
     {
       id: 3,
@@ -29,6 +31,7 @@ export function MustHaveBestSellers() {
       brand: "CALVIN KLEIN",
       price: 45.00,
       image: "https://images.unsplash.com/photo-1592945403244-b3faa7b3a4e1?ixlib=rb-4.0.3",
+      gender: "UNISEX",
     },
     {
       id: 4,
@@ -36,6 +39,7 @@ export function MustHaveBestSellers() {
       brand: "DIOR",
       price: 100.00,
       image: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?ixlib=rb-4.0.3",
+      gender: "FOR MEN",
     },
     {
       id: 5,
@@ -43,6 +47,7 @@ export function MustHaveBestSellers() {
       brand: "ISSEY MIYAKE",
       price: 65.00,
       image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?ixlib=rb-4.0.3",
+      gender: "FOR MEN",
     },
   ];
 
@@ -59,39 +64,59 @@ export function MustHaveBestSellers() {
           </button>
         </div>
         
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-4">
-            {products.map((product) => (
-              <CarouselItem key={product.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/5">
-                <div className="group cursor-pointer">
-                  <div className="aspect-square overflow-hidden bg-secondary-light mb-4">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover transform group-hover:scale-105 duration-500"
-                    />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-button-lg text-secondary-medium mb-1">{product.brand}</p>
-                    <h3 className="text-body-2 mb-2 line-clamp-2 group-hover:text-primary-accent duration-200">
-                      {product.name}
-                    </h3>
-                    <p className="text-h4">£{product.price.toFixed(2)}</p>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
-        </Carousel>
+        {/* Desktop Carousel (hidden on mobile) */}
+        <div className="hidden md:block">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4">
+              {products.map((product) => (
+                <CarouselItem key={product.id} className="pl-4 basis-1/5">
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
+        </div>
+
+        {/* Mobile Grid (hidden on desktop) */}
+        <div className="md:hidden grid grid-cols-2 gap-4">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       </div>
     </section>
+  );
+}
+
+// Product Card Component for reusability
+function ProductCard({ product }: { product: any }) {
+  return (
+    <div className="group cursor-pointer">
+      <div className="aspect-square overflow-hidden bg-secondary-light mb-4">
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-full object-cover transform group-hover:scale-105 duration-500"
+        />
+      </div>
+      <div className="text-left">
+        <p className="text-button-lg text-secondary-medium mb-1">{product.brand}</p>
+        <h3 className="text-body-2 mb-2 line-clamp-2 group-hover:text-primary-accent duration-200">
+          {product.name}
+        </h3>
+        <p className="text-h4">£{product.price.toFixed(2)}</p>
+        {product.gender && (
+          <p className="text-button-sm text-secondary-medium mt-1">{product.gender}</p>
+        )}
+      </div>
+    </div>
   );
 }

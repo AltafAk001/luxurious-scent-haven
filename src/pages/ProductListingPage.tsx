@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -231,7 +230,7 @@ const ProductCard = ({ product }: { product: any }) => {
   );
 };
 
-// Component for filter section
+// Component for filter section with mobile optimization
 const FilterSection = ({ 
   title, 
   expanded, 
@@ -246,7 +245,7 @@ const FilterSection = ({
   return (
     <div className="mb-4 border-b border-secondary pb-4">
       <div 
-        className="flex justify-between items-center cursor-pointer"
+        className="flex justify-between items-center cursor-pointer py-2"
         onClick={toggleExpand}
       >
         <h3 className="text-h5 uppercase">{title}</h3>
@@ -257,7 +256,7 @@ const FilterSection = ({
         )}
       </div>
       {expanded && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 space-y-2 animate-accordion-down">
           {children}
         </div>
       )}
@@ -315,6 +314,8 @@ const ProductListingPage = () => {
     priceMin: priceRange[0],
     priceMax: priceRange[1],
   });
+
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   // Toggle expand/collapse for filter sections
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -511,17 +512,17 @@ const ProductListingPage = () => {
 
   return (
     <div className="bg-white">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 md:py-8">
         <Breadcrumb items={breadcrumbItems} />
         
         {/* Featured Product Banner */}
-        <div className="mb-12 bg-primary-dark text-white overflow-hidden">
+        <div className="mb-8 md:mb-12 bg-primary-dark text-white overflow-hidden">
           <div className="grid md:grid-cols-2">
-            <div className="p-8 md:p-12 flex flex-col justify-center">
-              <h2 className="text-h1 md:text-display-2 mb-4">{featuredProduct.title}</h2>
+            <div className="p-6 md:p-12 flex flex-col justify-center">
+              <h2 className="text-h2 md:text-display-2 mb-4">{featuredProduct.title}</h2>
               <p className="text-body-1 mb-6">{featuredProduct.description}</p>
               <div>
-                <Button variant="accent" size="xl" className="w-40">BUY NOW</Button>
+                <Button variant="accent" size="xl" className="w-full md:w-40">BUY NOW</Button>
               </div>
             </div>
             <div className="hidden md:block relative h-full min-h-[400px]">
@@ -534,11 +535,23 @@ const ProductListingPage = () => {
           </div>
         </div>
         
+        {/* Mobile Filter Button */}
+        <div className="sticky top-0 z-10 bg-white py-2 md:hidden border-b border-secondary mb-4">
+          <Button 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+          >
+            <span>Filters</span>
+            {isMobileFiltersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </Button>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Filters Column */}
-          <div className="md:col-span-1">
-            <div className="sticky top-20">
-              {/* Perfumes Filter */}
+          <div className={`${isMobileFiltersOpen ? 'block' : 'hidden'} md:block md:col-span-1 bg-white`}>
+            <div className="md:sticky md:top-20 space-y-6">
+              {/* Filter sections */}
               <FilterSection 
                 title="Perfumes" 
                 expanded={expandedSections.perfumes} 
@@ -809,64 +822,10 @@ const ProductListingPage = () => {
           {/* Products Column */}
           <div className="md:col-span-3">
             {/* Product Count and Sort */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
               <div className="text-body-2 text-secondary-medium">
                 0-{visibleProducts.length} out of {filteredProducts.length} items
               </div>
-              <div className="flex items-center">
+              <div className="flex items-center w-full md:w-auto">
                 <span className="text-button-lg mr-2">SORT BY:</span>
-                <select className="border border-secondary px-3 py-1.5 rounded">
-                  <option>BEST SELLERS</option>
-                  <option>PRICE LOW TO HIGH</option>
-                  <option>PRICE HIGH TO LOW</option>
-                  <option>NEWEST FIRST</option>
-                </select>
-              </div>
-            </div>
-            
-            {/* Product Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {visibleProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-            
-            {/* Load More */}
-            {hasMore && (
-              <div className="mt-8 flex justify-center">
-                <Button
-                  variant="light"
-                  size="lg"
-                  className="border border-secondary"
-                  onClick={handleLoadMore}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader size={18} className="animate-spin mr-2" />
-                      LOADING...
-                    </>
-                  ) : (
-                    "LOAD MORE"
-                  )}
-                </Button>
-              </div>
-            )}
-            
-            {/* No Products Found */}
-            {visibleProducts.length === 0 && (
-              <div className="py-12 text-center">
-                <h3 className="text-h3 mb-2">No products found</h3>
-                <p className="text-body-1 text-secondary-medium">
-                  Try adjusting your filters to find what you're looking for.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ProductListingPage;
+                <select className="border border-secondary px-3 py-1.5 rounded w-full md:w-auto

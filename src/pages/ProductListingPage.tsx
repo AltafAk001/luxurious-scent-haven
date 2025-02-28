@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -824,8 +825,80 @@ const ProductListingPage = () => {
             {/* Product Count and Sort */}
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
               <div className="text-body-2 text-secondary-medium">
-                0-{visibleProducts.length} out of {filteredProducts.length} items
+                {visibleProducts.length > 0 ? `1-${visibleProducts.length}` : '0'} out of {filteredProducts.length} items
               </div>
-              <div className="flex items-center w-full md:w-auto">
-                <span className="text-button-lg mr-2">SORT BY:</span>
-                <select className="border border-secondary px-3 py-1.5 rounded w-full md:w-auto
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <span className="text-button-lg whitespace-nowrap">SORT BY:</span>
+                <select className="border border-secondary px-3 py-1.5 rounded w-full md:w-auto">
+                  <option>Featured</option>
+                  <option>Price: Low to High</option>
+                  <option>Price: High to Low</option>
+                  <option>Newest First</option>
+                  <option>Best Sellers</option>
+                </select>
+              </div>
+            </div>
+            
+            {/* Products Grid */}
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-h4 text-secondary-medium mb-4">No products found</p>
+                <p className="text-body-2 mb-8">Try changing your filter options</p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setActiveFilters({
+                      ...activeFilters,
+                      gender: { men: false, women: false, unisex: false },
+                      category: { eduParfum: false, eduToilette: false, eduCologne: false, bodySpray: false, parfumOil: false },
+                      gifts: { newArrivals: false, specialOffers: false, freeDelivery: false, fragranceSets: false },
+                      occasion: { newStoreOpening: false, otherOccasion: false },
+                      deals: { allDiscounts: false, todaysDeals: false },
+                      brands: {},
+                      priceMin: 0,
+                      priceMax: 200,
+                    });
+                    setPriceRange([0, 200]);
+                  }}
+                >
+                  Clear All Filters
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                  {visibleProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+                
+                {/* Load More Button */}
+                {hasMore && (
+                  <div className="text-center mt-8">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleLoadMore}
+                      disabled={loading}
+                      className="min-w-[200px]"
+                    >
+                      {loading ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader size={18} className="animate-spin" />
+                          <span>Loading...</span>
+                        </div>
+                      ) : (
+                        "Load More"
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductListingPage;

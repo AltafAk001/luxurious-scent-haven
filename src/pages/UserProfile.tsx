@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Search, Bell, Tag } from "lucide-react";
+import { Search, Bell, Tag, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Order {

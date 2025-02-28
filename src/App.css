@@ -1,8 +1,10 @@
+
 #root {
-  max-width: 1280px;
+  max-width: 100%; /* Changed from 1280px to ensure it doesn't cause overflow */
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  overflow-x: hidden; /* Prevent horizontal scroll in the root element */
 }
 
 .logo {

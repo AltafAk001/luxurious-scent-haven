@@ -11,9 +11,9 @@ import UserProfile from "./pages/UserProfile";
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col overflow-x-hidden w-full">
         <Navigation />
-        <main className="flex-1">
+        <main className="flex-1 w-full overflow-x-hidden">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/product/:id" element={<ProductPage />} />

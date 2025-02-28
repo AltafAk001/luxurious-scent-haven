@@ -6,6 +6,7 @@ import Index from "./pages/Index";
 import ProductPage from "./pages/ProductPage";
 import ProductListingPage from "./pages/ProductListingPage";
 import NotFound from "./pages/NotFound";
+import UserProfile from "./pages/UserProfile";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/products" element={<ProductListingPage />} />
             <Route path="/perfumes" element={<ProductListingPage />} />
             <Route path="/best-sellers" element={<ProductListingPage />} />
+            <Route path="/profile" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

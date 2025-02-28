@@ -1,9 +1,14 @@
 
 import { ShoppingBag, User, Search, Menu } from "lucide-react";
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  
+  // Hide navigation on profile page
+  const isProfilePage = location.pathname === "/profile";
 
   return (
     <>
@@ -13,9 +18,9 @@ export function Navigation() {
       <nav className="bg-primary-dark sticky top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <a href="/" className="text-h3 text-white">
+            <Link to="/" className="text-h3 text-white">
               SCENT HAVEN
-            </a>
+            </Link>
             
             <div className="hidden md:block flex-1 max-w-xl px-8">
               <div className="relative">
@@ -31,9 +36,12 @@ export function Navigation() {
             </div>
 
             <div className="flex items-center space-x-6">
-              <button className="hidden md:block text-white hover:text-primary-accent duration-200">
+              <Link 
+                to="/profile" 
+                className="hidden md:block text-white hover:text-primary-accent duration-200"
+              >
                 <User size={20} />
-              </button>
+              </Link>
               <button className="text-white hover:text-primary-accent duration-200 relative">
                 <ShoppingBag size={20} />
                 <span className="absolute -top-2 -right-2 bg-primary-accent text-primary-dark text-button-sm w-5 h-5 rounded-full flex items-center justify-center">
@@ -52,21 +60,23 @@ export function Navigation() {
             </div>
           </div>
           
-          <div className={`border-t border-white/10 ${isMobileMenuOpen ? 'block' : 'hidden md:block'}`}>
-            <div className="flex flex-col md:flex-row md:space-x-8 space-y-2 md:space-y-0 py-3 overflow-x-auto">
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">NEW ARRIVALS</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">BRANDS</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">SCENTS</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">MEN</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">WOMEN</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">DESIGNER</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">NICHE</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">JOURNAL</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">ABOUT</a>
-              <a href="#" className="text-button-lg text-white hover:text-primary-accent duration-200">STORE FINDER</a>
-              <a href="#" className="text-button-lg text-primary-accent hover:text-white duration-200">OFFERS</a>
+          {!isProfilePage && (
+            <div className={`border-t border-white/10 ${isMobileMenuOpen ? 'block' : 'hidden md:block'}`}>
+              <div className="flex flex-col md:flex-row md:space-x-8 space-y-2 md:space-y-0 py-3 overflow-x-auto">
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">NEW ARRIVALS</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">BRANDS</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">SCENTS</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">MEN</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">WOMEN</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">DESIGNER</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">NICHE</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">JOURNAL</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">ABOUT</Link>
+                <Link to="/products" className="text-button-lg text-white hover:text-primary-accent duration-200">STORE FINDER</Link>
+                <Link to="/products" className="text-button-lg text-primary-accent hover:text-white duration-200">OFFERS</Link>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </nav>
     </>

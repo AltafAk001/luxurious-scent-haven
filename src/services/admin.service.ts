@@ -1,6 +1,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { Product } from './product.service';
+import { User } from '@supabase/supabase-js';
 
 export type DashboardStats = {
   totalProducts: number;
@@ -27,9 +28,9 @@ export const adminService = {
       .select('*', { count: 'exact', head: true });
     
     // Get total users
-    const { count: totalUsers } = await supabase.auth.admin
-      .listUsers({ page: 1, perPage: 1 })
-      .then(response => ({ count: response.data.users.length }));
+    const { data: usersData } = await supabase.auth.admin
+      .listUsers();
+    const totalUsers = usersData?.users?.length || 0;
     
     // For orders and revenue, we'll use cart_items as a proxy
     // In a real app, you'd have an orders table
@@ -37,12 +38,16 @@ export const adminService = {
       .from('cart_items')
       .select(`
         quantity,
+        user_id,
         product:products(price, discount_price)
       `);
     
-    const totalOrders = cartItems ? new Set(cartItems.map(item => item.user_id)).size : 0;
+    // Count unique user_ids as orders
+    const uniqueUserIds = cartItems ? new Set(cartItems.map(item => item.user_id)).size : 0;
+    const totalOrders = uniqueUserIds;
     
     const revenue = cartItems ? cartItems.reduce((sum, item) => {
+      // Handle the product field structure correctly
       const productObj = item.product as unknown as Product;
       const price = productObj?.discount_price || productObj?.price || 0;
       return sum + (price * item.quantity);
@@ -50,19 +55,31 @@ export const adminService = {
     
     return {
       totalProducts: totalProducts || 0,
-      totalUsers: totalUsers || 0,
+      totalUsers,
       totalOrders,
       revenue
     };
   },
   
   async getUsers(page: number = 1, pageSize: number = 10): Promise<{ users: UserData[], total: number }> {
-    const { data, count } = await supabase.auth.admin
+    const { data } = await supabase.auth.admin
       .listUsers({ page, perPage: pageSize });
     
+    const users = data?.users || [];
+    const total = users.length; // Use this as a fallback since count isn't available
+    
+    // Convert User type to UserData type to ensure compatibility
+    const userData: UserData[] = users.map(user => ({
+      id: user.id,
+      email: user.email || '', // Ensure email is never undefined
+      created_at: user.created_at || '',
+      last_sign_in_at: user.last_sign_in_at,
+      user_metadata: user.user_metadata
+    }));
+    
     return {
-      users: data?.users || [],
-      total: count || 0
+      users: userData,
+      total
     };
   },
   

@@ -4,6 +4,7 @@ import AdminSidebar from "./AdminSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user, loading } = useAuth();
+  const { toast } = useToast();
   
   // If still loading, show a loading indicator
   if (loading) {
@@ -24,7 +26,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   
   // Simple admin check - you might want to implement a more robust role-based check
   // For now, we'll assume all logged in users can access admin
-  // In a real app, you'd check for admin role in user.user_metadata or similar
   
   return (
     <SidebarProvider>

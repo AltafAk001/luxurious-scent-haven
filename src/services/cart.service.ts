@@ -4,8 +4,8 @@ import { Product } from './product.service';
 
 export type CartItem = {
   id: number;
-  productId: number;
-  userId: string;
+  product_id: number; // Changed from productId to match database column name
+  user_id: string;    // Changed from userId to match database column name
   quantity: number;
   product?: Product;
 };
@@ -21,12 +21,12 @@ export const cartService = {
       .from('cart_items')
       .select(`
         id,
-        productId,
-        userId,
+        product_id,
+        user_id,
         quantity,
         product:products(*)
       `)
-      .eq('userId', userId);
+      .eq('user_id', userId);
     
     if (error) {
       console.error('Error fetching cart:', error);
@@ -47,8 +47,8 @@ export const cartService = {
     const { data: existingItems } = await supabase
       .from('cart_items')
       .select('*')
-      .eq('userId', userId)
-      .eq('productId', productId);
+      .eq('user_id', userId)
+      .eq('product_id', productId);
     
     if (existingItems && existingItems.length > 0) {
       // Update quantity if item exists
@@ -62,7 +62,7 @@ export const cartService = {
       // Insert new item if it doesn't exist
       const { error } = await supabase
         .from('cart_items')
-        .insert({ userId, productId, quantity });
+        .insert({ user_id: userId, product_id: productId, quantity });
       
       if (error) console.error('Error adding item to cart:', error);
     }
@@ -90,7 +90,7 @@ export const cartService = {
     const { error } = await supabase
       .from('cart_items')
       .delete()
-      .eq('userId', userId);
+      .eq('user_id', userId);
     
     if (error) console.error('Error clearing cart:', error);
   }

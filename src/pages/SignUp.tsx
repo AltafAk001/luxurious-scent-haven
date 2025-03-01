@@ -1,9 +1,12 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -13,11 +16,64 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [newsletter, setNewsletter] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { signUp } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Registration logic would go here
-    console.log("Sign up attempt with:", { email, username, password, newsletter });
+    
+    if (password !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      await signUp(email, password, {
+        username,
+        newsletter
+      });
+      
+      toast({
+        title: "Account created successfully",
+        description: "You can now sign in with your credentials",
+      });
+      navigate("/login");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: error.message || "Please try again",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialSignUp = async (provider: 'google' | 'facebook') => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: window.location.origin + '/profile',
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Sign up failed",
+        description: error.message || `Failed to sign up with ${provider}`,
+      });
+    }
   };
 
   return (
@@ -38,6 +94,7 @@ const SignUp = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12 border-secondary uppercase text-sm"
                   required
+                  disabled={isLoading}
                 />
               </div>
 
@@ -49,6 +106,7 @@ const SignUp = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   className="h-12 border-secondary uppercase text-sm"
                   required
+                  disabled={isLoading}
                 />
               </div>
 
@@ -60,12 +118,14 @@ const SignUp = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-12 border-secondary uppercase text-sm pr-10"
                   required
+                  disabled={isLoading}
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-secondary-medium"
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -79,12 +139,14 @@ const SignUp = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="h-12 border-secondary uppercase text-sm pr-10"
                   required
+                  disabled={isLoading}
                 />
                 <button 
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-3 text-secondary-medium"
                   aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  disabled={isLoading}
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -97,6 +159,7 @@ const SignUp = () => {
                   checked={newsletter}
                   onChange={() => setNewsletter(!newsletter)}
                   className="h-4 w-4 border-secondary rounded mt-1"
+                  disabled={isLoading}
                 />
                 <label htmlFor="newsletter" className="text-xs text-secondary-dark">
                   I want to get personalized offers about newly added products, special offers and discount codes.
@@ -114,8 +177,9 @@ const SignUp = () => {
                 type="submit"
                 variant="dark"
                 className="w-full h-12 uppercase"
+                disabled={isLoading}
               >
-                <span className="text-primary-accent">Create Account</span>
+                {isLoading ? "Creating Account..." : <span className="text-primary-accent">Create Account</span>}
               </Button>
             </div>
           </form>
@@ -134,7 +198,8 @@ const SignUp = () => {
               type="button"
               variant="light"
               className="w-full h-12 uppercase flex items-center justify-center space-x-2"
-              onClick={() => console.log("Sign up with Google")}
+              onClick={() => handleSocialSignUp('google')}
+              disabled={isLoading}
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path
@@ -161,7 +226,8 @@ const SignUp = () => {
               type="button"
               variant="light"
               className="w-full h-12 uppercase flex items-center justify-center space-x-2"
-              onClick={() => console.log("Sign up with Facebook")}
+              onClick={() => handleSocialSignUp('facebook')}
+              disabled={isLoading}
             >
               <svg className="h-5 w-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9.94474914,22 L9.94474914,13.1657526 L7,13.1657526 L7,9.48481614 L9.94474914,9.48481614 L9.94474914,6.54006699 C9.94474914,3.49740494 11.8713513,2 14.5856738,2 C15.8857805,2 17.0033128,2.09717672 17.3287076,2.13987558 L17.3287076,5.32020466 L15.4462767,5.32094085 C13.9702212,5.32094085 13.6256856,6.02252733 13.6256856,7.05171716 L13.6256856,9.48481614 L17.306622,9.48481614 L16.5704347,13.1657526 L13.6256856,13.1657526 L13.6256856,22" />

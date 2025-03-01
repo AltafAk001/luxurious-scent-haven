@@ -6,17 +6,17 @@ export type Product = {
   name: string;
   brand: string;
   price: number;
-  discountPrice?: number;
+  discount_price?: number; // Updated to match database column name
   image: string;
   description?: string;
   rating?: number;
   reviews?: number;
-  inStock: boolean;
+  in_stock: boolean; // Updated to match database column name
   sizes?: string[];
-  bestSeller?: boolean;
-  featuredProduct?: boolean;
+  best_seller?: boolean; // Updated to match database column name
+  featured_product?: boolean; // Updated to match database column name
   category?: string;
-  createdAt?: string;
+  created_at?: string; // Updated to match database column name
 };
 
 export const productService = {
@@ -52,7 +52,7 @@ export const productService = {
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('bestSeller', true);
+      .eq('best_seller', true);
     
     if (error) {
       console.error('Error fetching best sellers:', error);
@@ -66,7 +66,7 @@ export const productService = {
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('featuredProduct', true);
+      .eq('featured_product', true);
     
     if (error) {
       console.error('Error fetching featured products:', error);

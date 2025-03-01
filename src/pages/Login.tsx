@@ -1,20 +1,42 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Authentication logic would go here
-    console.log("Login attempt with:", { email, password, rememberMe });
+    setIsLoading(true);
+    
+    try {
+      await signIn(email, password);
+      toast({
+        title: "Successfully logged in",
+        description: "Welcome back to Nigedum",
+      });
+      navigate("/profile");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,6 +66,7 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12 border-secondary uppercase text-sm"
                   required
+                  disabled={isLoading}
                 />
               </div>
 
@@ -55,12 +78,14 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-12 border-secondary uppercase text-sm pr-10"
                   required
+                  disabled={isLoading}
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-secondary-medium"
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -74,6 +99,7 @@ const Login = () => {
                     checked={rememberMe}
                     onChange={() => setRememberMe(!rememberMe)}
                     className="h-4 w-4 border-secondary rounded"
+                    disabled={isLoading}
                   />
                   <label htmlFor="remember-me" className="text-xs uppercase">
                     Keep me sign in
@@ -89,8 +115,9 @@ const Login = () => {
                 type="submit"
                 variant="dark"
                 className="w-full h-12 uppercase"
+                disabled={isLoading}
               >
-                Sign In
+                {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </div>
           </form>
@@ -109,7 +136,24 @@ const Login = () => {
               type="button"
               variant="light"
               className="w-full h-12 uppercase flex items-center justify-center space-x-2"
-              onClick={() => console.log("Sign in with Google")}
+              onClick={async () => {
+                try {
+                  const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                      redirectTo: window.location.origin + '/profile',
+                    }
+                  });
+                  if (error) throw error;
+                } catch (error: any) {
+                  toast({
+                    variant: "destructive",
+                    title: "Login failed",
+                    description: error.message || "Failed to sign in with Google",
+                  });
+                }
+              }}
+              disabled={isLoading}
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path
@@ -136,7 +180,24 @@ const Login = () => {
               type="button"
               variant="light"
               className="w-full h-12 uppercase flex items-center justify-center space-x-2"
-              onClick={() => console.log("Sign in with Facebook")}
+              onClick={async () => {
+                try {
+                  const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'facebook',
+                    options: {
+                      redirectTo: window.location.origin + '/profile',
+                    }
+                  });
+                  if (error) throw error;
+                } catch (error: any) {
+                  toast({
+                    variant: "destructive",
+                    title: "Login failed",
+                    description: error.message || "Failed to sign in with Facebook",
+                  });
+                }
+              }}
+              disabled={isLoading}
             >
               <svg className="h-5 w-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9.94474914,22 L9.94474914,13.1657526 L7,13.1657526 L7,9.48481614 L9.94474914,9.48481614 L9.94474914,6.54006699 C9.94474914,3.49740494 11.8713513,2 14.5856738,2 C15.8857805,2 17.0033128,2.09717672 17.3287076,2.13987558 L17.3287076,5.32020466 L15.4462767,5.32094085 C13.9702212,5.32094085 13.6256856,6.02252733 13.6256856,7.05171716 L13.6256856,9.48481614 L17.306622,9.48481614 L16.5704347,13.1657526 L13.6256856,13.1657526 L13.6256856,22" />

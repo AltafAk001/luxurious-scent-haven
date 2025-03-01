@@ -1,23 +1,25 @@
 
-import { Navigation } from "@/components/Navigation";
 import { HeroSection } from "@/components/HeroSection";
-import { BrandBar } from "@/components/BrandBar";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
+import { BrandBar } from "@/components/BrandBar";
 import { MustHaveBestSellers } from "@/components/MustHaveBestSellers";
 import { SaleOffBestPrices } from "@/components/SaleOffBestPrices";
-import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 
 const Index = () => {
   return (
-    <main className="min-h-screen">
-      <Navigation />
+    <>
+      <SEO 
+        title="Nigedum | Premium Perfumes & Fragrances"
+        description="Discover our collection of luxury perfumes and fragrances at Nigedum. Find your signature scent with our carefully curated selection."
+        ogType="website"
+      />
       <HeroSection />
       <BrandBar />
       <FeaturedProducts />
       <MustHaveBestSellers />
       <SaleOffBestPrices />
-      <Footer />
-    </main>
+    </>
   );
 };
 

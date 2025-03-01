@@ -13,13 +13,6 @@ import UserProfile from "./pages/UserProfile";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Toaster } from "./components/ui/toaster";
 
-// Import Admin Components
-import AdminLayout from "./components/AdminLayout";
-import AdminDashboard from "./pages/Admin/Dashboard";
-import AdminProducts from "./pages/Admin/Products";
-import AdminUsers from "./pages/Admin/Users";
-import AdminSettings from "./pages/Admin/Settings";
-
 function App() {
   return (
     <AuthProvider>
@@ -33,13 +26,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<UserProfile />} />
-        
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-        <Route path="/admin/products" element={<AdminLayout><AdminProducts /></AdminLayout>} />
-        <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
-        <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
-        
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

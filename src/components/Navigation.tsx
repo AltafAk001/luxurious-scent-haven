@@ -10,6 +10,9 @@ export const Navigation = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const isMobile = useIsMobile();
 
+  // Mock cart count
+  const cartCount = 2;
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -58,7 +61,7 @@ export const Navigation = () => {
             <Link to="/cart" className="text-white hover:text-primary-accent relative">
               <ShoppingBag size={20} />
               <span className="absolute -top-1 -right-1 bg-primary-accent text-primary-dark text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                0
+                {cartCount}
               </span>
             </Link>
             <Link to="/login" className="text-white hover:text-primary-accent">
@@ -84,6 +87,9 @@ export const Navigation = () => {
               </Link>
               <Link to="/store-finder" className="text-white hover:text-primary-accent py-2">
                 STORE FINDER
+              </Link>
+              <Link to="/cart" className="text-white hover:text-primary-accent py-2">
+                BAG ({cartCount})
               </Link>
               <Link to="/login" className="text-white hover:text-primary-accent py-2">
                 LOGIN

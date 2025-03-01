@@ -9,6 +9,9 @@ import NotFound from "./pages/NotFound";
 import UserProfile from "./pages/UserProfile";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation";
 
 function App() {
   return (
@@ -25,6 +28,9 @@ function App() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

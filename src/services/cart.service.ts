@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Product } from './product.service';
 
@@ -6,7 +7,7 @@ export type CartItem = {
   product_id: number; // Changed from productId to match database column name
   user_id: string;    // Changed from userId to match database column name
   quantity: number;
-  product?: Product;
+  product?: Product;  // This should be a single Product object, not an array
 };
 
 export type Cart = {
@@ -34,11 +35,17 @@ export const cartService = {
     
     const items = data || [];
     const total = items.reduce((sum, item) => {
-      const price = item.product?.discount_price || item.product?.price || 0;
+      // Access product as a single object, not an array
+      const productObject = item.product as unknown as Product;
+      const price = productObject?.discount_price || productObject?.price || 0;
       return sum + (price * item.quantity);
     }, 0);
     
-    const typedItems = items as unknown as CartItem[];
+    // Properly type the items with the product property correctly mapped
+    const typedItems = items.map(item => ({
+      ...item,
+      product: item.product as unknown as Product
+    })) as CartItem[];
     
     return { items: typedItems, total };
   },

@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Breadcrumb } from "@/components/Breadcrumb";
 
 // Mock cart data and user data
 const cartItems = [
@@ -54,46 +54,18 @@ const Checkout = () => {
     navigate("/order-confirmation");
   };
 
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Bag", href: "/cart" },
+    { label: "Checkout", href: "/checkout" }
+  ];
+
   return (
     <div className="bg-white min-h-screen">
       {/* Breadcrumb */}
       <div className="border-b border-gray-200">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center text-sm">
-            <Link to="/" className="text-gray-500 hover:text-primary-dark">
-              HOME
-            </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <Link to="/cart" className="text-gray-500 hover:text-primary-dark">
-              BAG
-            </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <Link to="/cart" className="text-gray-500 hover:text-primary-dark">
-              REVIEW ORDER
-            </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <Link to="/login" className="text-gray-500 hover:text-primary-dark">
-              LOG IN
-            </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <Link to="/signup" className="text-gray-500 hover:text-primary-dark">
-              CREATE ACCOUNT
-            </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <span className="font-medium">CHECKOUT</span>
-            <span className="mx-2 text-gray-400">/</span>
-            <Link to="/checkout/shipping" className="text-gray-500 hover:text-primary-dark">
-              SHIPPING ADDRESS
-            </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <Link to="/checkout/payment" className="text-gray-500 hover:text-primary-dark">
-              PAYMENT METHOD
-            </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <Link to="/order-confirmation" className="text-gray-500 hover:text-primary-dark">
-              ORDER CONFIRMATION
-            </Link>
-          </div>
+        <div className="container mx-auto px-4">
+          <Breadcrumb items={breadcrumbItems} />
         </div>
       </div>
 

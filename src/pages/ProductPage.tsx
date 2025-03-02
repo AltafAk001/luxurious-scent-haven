@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Star } from "lucide-react";
@@ -13,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { SEO } from "@/components/SEO";
+import { Breadcrumb } from "@/components/Breadcrumb";
 
 const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,6 +52,12 @@ const ProductPage = () => {
     setSelectedSize(size);
   };
 
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Shop", href: "/products" },
+    { label: product.name, href: `/product/${id}` }
+  ];
+
   return (
     <div>
       <SEO 
@@ -63,18 +70,8 @@ const ProductPage = () => {
       <div className="bg-white">
         {/* Breadcrumb */}
         <div className="border-b border-gray-200">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center text-sm">
-              <a href="/" className="text-gray-500 hover:text-primary-dark">
-                HOME
-              </a>
-              <span className="mx-2 text-gray-400">/</span>
-              <a href="/products" className="text-gray-500 hover:text-primary-dark">
-                SHOP
-              </a>
-              <span className="mx-2 text-gray-400">/</span>
-              <span className="font-medium">{product.name}</span>
-            </div>
+          <div className="container mx-auto px-4">
+            <Breadcrumb items={breadcrumbItems} />
           </div>
         </div>
 

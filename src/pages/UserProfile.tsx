@@ -9,13 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { ShieldCheck, Package, CreditCard, History, LogOut, ChevronRight, UserCog, Megaphone } from "lucide-react";
+import { ShieldCheck, Package, CreditCard, History, LogOut, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cartService } from "@/services/cart.service";
-import { Badge } from "@/components/ui/badge";
 
 const UserProfile = () => {
-  const { user, userRole, loading, signOut, isAdmin, isAdsAdmin } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -86,28 +85,6 @@ const UserProfile = () => {
     }
   };
 
-  const renderRoleBadge = () => {
-    if (isAdmin()) {
-      return (
-        <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-          Admin
-        </Badge>
-      );
-    } else if (isAdsAdmin()) {
-      return (
-        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">
-          Ads Admin
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-          Customer
-        </Badge>
-      );
-    }
-  };
-
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row gap-6">
@@ -121,10 +98,7 @@ const UserProfile = () => {
                   <AvatarFallback>{firstName.charAt(0)}{lastName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <CardTitle>{firstName} {lastName}</CardTitle>
-                    {renderRoleBadge()}
-                  </div>
+                  <CardTitle>{firstName} {lastName}</CardTitle>
                   <CardDescription>{email}</CardDescription>
                 </div>
               </div>
@@ -163,20 +137,14 @@ const UserProfile = () => {
                   <ChevronRight className="h-4 w-4 text-secondary-medium" />
                 </Link>
                 
-                {/* Admin Dashboard Link - only visible for admin and ads_admin */}
-                {(isAdmin() || isAdsAdmin()) && (
-                  <Link to="/admin" className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-secondary-light text-primary-dark">
-                    <div className="flex items-center gap-3">
-                      {isAdmin() ? (
-                        <UserCog className="h-5 w-5" />
-                      ) : (
-                        <Megaphone className="h-5 w-5" />
-                      )}
-                      <span>Admin Dashboard</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4" />
-                  </Link>
-                )}
+                {/* Admin Dashboard Link */}
+                <Link to="/admin" className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-secondary-light text-contrast-red">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="h-5 w-5" />
+                    <span>Admin Dashboard</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
                 
                 <button 
                   onClick={handleLogout} 
@@ -233,14 +201,6 @@ const UserProfile = () => {
                         id="email" 
                         type="email" 
                         value={email} 
-                        disabled 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Input 
-                        id="role" 
-                        value={userRole === 'admin' ? 'Administrator' : userRole === 'ads_admin' ? 'Ads Administrator' : 'Customer'} 
                         disabled 
                       />
                     </div>

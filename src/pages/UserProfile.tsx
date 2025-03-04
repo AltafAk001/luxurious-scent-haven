@@ -137,15 +137,6 @@ const UserProfile = () => {
                   <ChevronRight className="h-4 w-4 text-secondary-medium" />
                 </Link>
                 
-                {/* Admin Dashboard Link */}
-                <Link to="/admin" className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-secondary-light text-contrast-red">
-                  <div className="flex items-center gap-3">
-                    <ShieldCheck className="h-5 w-5" />
-                    <span>Admin Dashboard</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-                
                 <button 
                   onClick={handleLogout} 
                   className="flex items-center justify-between w-full py-2 px-3 rounded-md hover:bg-secondary-light text-contrast-red"

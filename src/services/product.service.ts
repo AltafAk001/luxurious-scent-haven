@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 
 export type Product = {
   id: number;
@@ -46,19 +46,15 @@ export const productService = {
       .from('products')
       .select('*', { count: 'exact' });
     
-    // Apply filters
-    /*if (filters) {
-      // Category filter
+    if (filters) {
       if (filters.category && filters.category.length > 0) {
         query = query.in('category', filters.category);
       }
       
-      // Brand filter
       if (filters.brand && filters.brand.length > 0) {
         query = query.in('brand', filters.brand);
       }
       
-      // Price range filter
       if (filters.priceMin !== undefined) {
         query = query.gte('price', filters.priceMin);
       }
@@ -66,17 +62,14 @@ export const productService = {
         query = query.lte('price', filters.priceMax);
       }
       
-      // Gender filter
       if (filters.gender && filters.gender.length > 0) {
         query = query.in('gender', filters.gender);
       }
       
-      // Occasion filter
       if (filters.occasion && filters.occasion.length > 0) {
         query = query.in('occasion', filters.occasion);
       }
       
-      // Boolean filters
       if (filters.isNewArrival) {
         query = query.eq('is_new_arrival', true);
       }
@@ -93,15 +86,13 @@ export const productService = {
         query = query.not('discount_price', 'is', null);
       }
       
-      // Search query
       if (filters.searchQuery) {
         query = query.or(
           `name.ilike.%${filters.searchQuery}%,brand.ilike.%${filters.searchQuery}%,description.ilike.%${filters.searchQuery}%`
         );
       }
     }
-    */
-    // Pagination
+    
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     
@@ -115,6 +106,87 @@ export const productService = {
     }
     
     return { data: data || [], count: count || 0 };
+  },
+  
+  async getProductsInfinite(
+    { pageParam = 1 },
+    pageSize = 8, 
+    filters?: ProductFilters
+  ): Promise<{ data: Product[], count: number, nextPage: number | null }> {
+    let query = supabase
+      .from('products')
+      .select('*', { count: 'exact' });
+    
+    if (filters) {
+      if (filters.category && filters.category.length > 0) {
+        query = query.in('category', filters.category);
+      }
+      
+      if (filters.brand && filters.brand.length > 0) {
+        query = query.in('brand', filters.brand);
+      }
+      
+      if (filters.priceMin !== undefined) {
+        query = query.gte('price', filters.priceMin);
+      }
+      if (filters.priceMax !== undefined) {
+        query = query.lte('price', filters.priceMax);
+      }
+      
+      if (filters.gender && filters.gender.length > 0) {
+        query = query.in('gender', filters.gender);
+      }
+      
+      if (filters.occasion && filters.occasion.length > 0) {
+        query = query.in('occasion', filters.occasion);
+      }
+      
+      if (filters.isNewArrival) {
+        query = query.eq('is_new_arrival', true);
+      }
+      if (filters.isSpecialOffer) {
+        query = query.eq('is_special_offer', true);
+      }
+      if (filters.isFreeDelivery) {
+        query = query.eq('is_free_delivery', true);
+      }
+      if (filters.isFragrance) {
+        query = query.eq('is_fragrance', true);
+      }
+      if (filters.hasDiscount) {
+        query = query.not('discount_price', 'is', null);
+      }
+      
+      if (filters.searchQuery) {
+        query = query.or(
+          `name.ilike.%${filters.searchQuery}%,brand.ilike.%${filters.searchQuery}%,description.ilike.%${filters.searchQuery}%`
+        );
+      }
+    }
+    
+    const from = (pageParam - 1) * pageSize;
+    const to = from + pageSize - 1;
+    
+    query = query.range(from, to);
+    
+    const { data, error, count } = await query;
+    
+    if (error) {
+      console.error('Error fetching products:', error);
+      return { 
+        data: [], 
+        count: 0, 
+        nextPage: null 
+      };
+    }
+    
+    const hasNextPage = count ? from + pageSize < count : false;
+    
+    return { 
+      data: data || [], 
+      count: count || 0, 
+      nextPage: hasNextPage ? pageParam + 1 : null 
+    };
   },
   
   async getProductById(id: number): Promise<Product | null> {
@@ -224,10 +296,9 @@ export const productService = {
       return { products: [], categories: [], brands: [] };
     }
     
-    // Get product suggestions
-    const { data: products, error: productsError } = await supabase
+    const { data: productsData, error: productsError } = await supabase
       .from('products')
-      .select('id, name, brand, image, price, discount_price, category')
+      .select('id, name, brand, image, price, discount_price, category, in_stock')
       .or(`name.ilike.%${query}%,brand.ilike.%${query}%,description.ilike.%${query}%`)
       .limit(5);
     
@@ -235,7 +306,6 @@ export const productService = {
       console.error('Error fetching product suggestions:', productsError);
     }
     
-    // Get category suggestions
     const { data: categories, error: categoriesError } = await supabase
       .from('products')
       .select('category')
@@ -246,7 +316,6 @@ export const productService = {
       console.error('Error fetching category suggestions:', categoriesError);
     }
     
-    // Get brand suggestions
     const { data: brands, error: brandsError } = await supabase
       .from('products')
       .select('brand')
@@ -257,23 +326,35 @@ export const productService = {
       console.error('Error fetching brand suggestions:', brandsError);
     }
     
-    // Extract unique categories and brands
     const uniqueCategories = Array.from(new Set(categories?.map(item => item.category) || []));
     const uniqueBrands = Array.from(new Set(brands?.map(item => item.brand) || []));
     
+    const products = productsData?.map(product => ({
+      ...product,
+      in_stock: product.in_stock !== undefined ? product.in_stock : true
+    })) as Product[] || [];
+    
     return {
-      products: products || [],
+      products,
       categories: uniqueCategories.filter(Boolean),
       brands: uniqueBrands.filter(Boolean)
     };
   }
 };
 
+export const useProductsInfinite = (pageSize = 8, filters?: ProductFilters) => {
+  return useInfiniteQuery({
+    queryKey: ['productsInfinite', pageSize, filters],
+    queryFn: (context) => productService.getProductsInfinite(context, pageSize, filters),
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
 export const useProducts = (page = 1, pageSize = 8, filters?: ProductFilters) => {
   return useQuery({
     queryKey: ['products', page, pageSize, filters],
     queryFn: () => productService.getProducts(page, pageSize, filters),
-    keepPreviousData: true,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };

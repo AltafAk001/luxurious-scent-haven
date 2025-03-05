@@ -4,7 +4,7 @@ import { useInView } from 'react-intersection-observer';
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
-import { useProducts, ProductFilters } from "@/services/product.service";
+import { useProductsInfinite, ProductFilters } from "@/services/product.service";
 import { useToast } from "@/hooks/use-toast";
 import { Loader, ChevronDown, ChevronUp, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -176,7 +176,7 @@ const ProductListingPage = () => {
     searchQuery: '',
   });
   
-  // Get products using React Query
+  // Get products using React Query with infinite loading
   const { 
     data, 
     isLoading, 
@@ -184,16 +184,15 @@ const ProductListingPage = () => {
     isFetchingNextPage, 
     hasNextPage, 
     fetchNextPage 
-  } = useProducts(page, 8, activeFilters);
+  } = useProductsInfinite(8, activeFilters);
   
-  const products = data?.data || [];
-  const totalProducts = data?.count || 0;
+  const products = data?.pages.flatMap(page => page.data) || [];
+  const totalProducts = data?.pages[0]?.count || 0;
   
   // Load more when in view
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
-      setPage(prevPage => prevPage + 1);
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
   

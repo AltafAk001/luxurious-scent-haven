@@ -939,8 +939,8 @@ const UserProfile = () => {
                 </div>
                 
                 <NotificationSettings 
-                  initialSettings={notificationSettings}
-                  onSave={handleUpdateNotificationSettings}
+                  initialSettings={notificationSettings} 
+                  onSave={handleUpdateNotificationSettings} 
                 />
               </>
             )}

@@ -1,13 +1,14 @@
 
 import { supabase } from '@/lib/supabase';
 import { Product } from './product.service';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type CartItem = {
   id: number;
-  product_id: number; // Changed from productId to match database column name
-  user_id: string;    // Changed from userId to match database column name
+  product_id: number;
+  user_id: string;
   quantity: number;
-  product?: Product;  // This should be a single Product object, not an array
+  product?: Product;
 };
 
 export type Cart = {
@@ -35,13 +36,11 @@ export const cartService = {
     
     const items = data || [];
     const total = items.reduce((sum, item) => {
-      // Access product as a single object, not an array
       const productObject = item.product as unknown as Product;
       const price = productObject?.discount_price || productObject?.price || 0;
       return sum + (price * item.quantity);
     }, 0);
     
-    // Properly type the items with the product property correctly mapped
     const typedItems = items.map(item => ({
       ...item,
       product: item.product as unknown as Product
@@ -99,4 +98,61 @@ export const cartService = {
     
     if (error) console.error('Error clearing cart:', error);
   }
+};
+
+// React Query hooks for cart operations
+export const useCart = (userId: string) => {
+  return useQuery({
+    queryKey: ['cart', userId],
+    queryFn: () => cartService.getCart(userId),
+    enabled: !!userId,
+    staleTime: 1 * 60 * 1000, // 1 minute
+  });
+};
+
+export const useAddToCart = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ userId, productId, quantity }: { userId: string, productId: number, quantity?: number }) => 
+      cartService.addToCart(userId, productId, quantity),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['cart', variables.userId] });
+    }
+  });
+};
+
+export const useUpdateCartItem = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ itemId, quantity, userId }: { itemId: number, quantity: number, userId: string }) => 
+      cartService.updateCartItem(itemId, quantity),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['cart', variables.userId] });
+    }
+  });
+};
+
+export const useRemoveFromCart = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ itemId, userId }: { itemId: number, userId: string }) => 
+      cartService.removeFromCart(itemId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['cart', variables.userId] });
+    }
+  });
+};
+
+export const useClearCart = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (userId: string) => cartService.clearCart(userId),
+    onSuccess: (_, userId) => {
+      queryClient.invalidateQueries({ queryKey: ['cart', userId] });
+    }
+  });
 };

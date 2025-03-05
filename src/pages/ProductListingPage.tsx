@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useInView } from 'react-intersection-observer';
@@ -186,6 +187,7 @@ const ProductListingPage = () => {
     fetchNextPage 
   } = useProductsInfinite(8, activeFilters);
   
+  // Properly type the data
   const products = data?.pages.flatMap(page => page.data) || [];
   const totalProducts = data?.pages[0]?.count || 0;
   

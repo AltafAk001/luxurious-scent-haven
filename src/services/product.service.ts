@@ -109,7 +109,7 @@ export const productService = {
   },
   
   async getProductsInfinite(
-    { pageParam = 1 },
+    { pageParam = 1 }: { pageParam: number },
     pageSize = 8, 
     filters?: ProductFilters
   ): Promise<{ data: Product[], count: number, nextPage: number | null }> {
@@ -345,9 +345,10 @@ export const productService = {
 export const useProductsInfinite = (pageSize = 8, filters?: ProductFilters) => {
   return useInfiniteQuery({
     queryKey: ['productsInfinite', pageSize, filters],
-    queryFn: (context) => productService.getProductsInfinite(context, pageSize, filters),
+    queryFn: (context) => productService.getProductsInfinite({ pageParam: context.pageParam as number }, pageSize, filters),
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    initialPageParam: 1 // Add this required parameter
   });
 };
 

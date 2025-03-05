@@ -1,4 +1,4 @@
-<lov-code>
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, Navigate } from "react-router-dom";
@@ -884,4 +884,177 @@ const UserProfile = () => {
                           className={`border rounded-lg p-4 relative ${address.isDefault ? 'border-primary bg-gray-50' : ''}`}
                         >
                           {address.isDefault && (
-                            <div className="absolute top-
+                            <div className="absolute top-2 right-2 bg-[#FFFAEB] text-[#FFC90B] text-xs px-2 py-0.5 rounded">
+                              Default Address
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">Name</div>
+                              <div className="font-medium">{address.name}</div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Address</div>
+                              <div>{address.street}, {address.city}, {address.state} {address.zipCode}</div>
+                              <div>{address.country}</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 mt-4 pt-4 border-t">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => setEditAddressId(address.id)}
+                            >
+                              Edit
+                            </Button>
+                            {!address.isDefault && (
+                              <>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleUpdateAddress(address.id, {...address, isDefault: true})}
+                                >
+                                  Set as Default
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleDeleteAddress(address.id)}
+                                >
+                                  Remove
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Payment Methods Section */}
+            {activeSection === "payment" && (
+              <>
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-xl font-bold">Payment Methods</h1>
+                  {!showPaymentForm && !editPaymentId && (
+                    <Button variant="dark" onClick={() => setShowPaymentForm(true)}>
+                      Add New Payment Method
+                    </Button>
+                  )}
+                </div>
+                
+                {showPaymentForm ? (
+                  <PaymentMethodForm 
+                    onSave={handleAddPaymentMethod}
+                    onCancel={() => setShowPaymentForm(false)}
+                  />
+                ) : editPaymentId ? (
+                  <PaymentMethodForm 
+                    editPaymentMethod={paymentMethods.find(p => p.id === editPaymentId)}
+                    onSave={(updatedPayment) => handleUpdatePaymentMethod(editPaymentId, updatedPayment)}
+                    onCancel={() => setEditPaymentId(null)}
+                  />
+                ) : (
+                  <div className="space-y-4">
+                    {paymentMethods.length === 0 ? (
+                      <div className="text-center py-10 border rounded-lg">
+                        <p className="text-gray-500 mb-4">You don't have any payment methods saved</p>
+                        <Button variant="dark" onClick={() => setShowPaymentForm(true)}>
+                          Add New Payment Method
+                        </Button>
+                      </div>
+                    ) : (
+                      paymentMethods.map((payment) => (
+                        <div 
+                          key={payment.id} 
+                          className={`border rounded-lg p-4 relative ${payment.isDefault ? 'border-primary bg-gray-50' : ''}`}
+                        >
+                          {payment.isDefault && (
+                            <div className="absolute top-2 right-2 bg-[#FFFAEB] text-[#FFC90B] text-xs px-2 py-0.5 rounded">
+                              Default Payment Method
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">Card Number</div>
+                              <div className="font-medium">**** **** **** {payment.cardNumber.slice(-4)}</div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Cardholder Name</div>
+                              <div>{payment.cardholderName}</div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Expiry Date</div>
+                              <div>{payment.expiryDate}</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 mt-4 pt-4 border-t">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => setEditPaymentId(payment.id)}
+                            >
+                              Edit
+                            </Button>
+                            {!payment.isDefault && (
+                              <>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleUpdatePaymentMethod(payment.id, {...payment, isDefault: true})}
+                                >
+                                  Set as Default
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleDeletePaymentMethod(payment.id)}
+                                >
+                                  Remove
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Notifications Section */}
+            {activeSection === "notifications" && (
+              <>
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-xl font-bold">Notification Settings</h1>
+                </div>
+                
+                <NotificationSettings 
+                  settings={notificationSettings}
+                  onSave={handleUpdateNotificationSettings}
+                />
+              </>
+            )}
+
+            {/* Vouchers Section */}
+            {activeSection === "vouchers" && (
+              <>
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-xl font-bold">My Vouchers</h1>
+                </div>
+                
+                <VoucherList vouchers={vouchers} />
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserProfile;

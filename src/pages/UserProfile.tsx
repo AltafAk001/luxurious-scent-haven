@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, Navigate } from "react-router-dom";
@@ -175,7 +174,6 @@ const mockVouchers: Voucher[] = [
   }
 ];
 
-// Component
 const UserProfile = () => {
   const { user, loading, signOut } = useAuth();
   const [firstName, setFirstName] = useState("");
@@ -415,7 +413,6 @@ const UserProfile = () => {
     return purchases.filter(p => p.status.toLowerCase().replace(" ", "") === status).length;
   };
 
-  // Main render function begins here
   return (
     <div className="bg-white min-h-screen">
       <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
@@ -934,98 +931,6 @@ const UserProfile = () => {
               </>
             )}
 
-            {/* Payment Methods Section */}
-            {activeSection === "payment" && (
-              <>
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-xl font-bold">Payment Methods</h1>
-                  {!showPaymentForm && !editPaymentId && (
-                    <Button variant="dark" onClick={() => setShowPaymentForm(true)}>
-                      Add New Payment Method
-                    </Button>
-                  )}
-                </div>
-                
-                {showPaymentForm ? (
-                  <PaymentMethodForm 
-                    onSave={handleAddPaymentMethod}
-                    onCancel={() => setShowPaymentForm(false)}
-                  />
-                ) : editPaymentId ? (
-                  <PaymentMethodForm 
-                    editPaymentMethod={paymentMethods.find(p => p.id === editPaymentId)}
-                    onSave={(updatedPayment) => handleUpdatePaymentMethod(editPaymentId, updatedPayment)}
-                    onCancel={() => setEditPaymentId(null)}
-                  />
-                ) : (
-                  <div className="space-y-4">
-                    {paymentMethods.length === 0 ? (
-                      <div className="text-center py-10 border rounded-lg">
-                        <p className="text-gray-500 mb-4">You don't have any payment methods saved</p>
-                        <Button variant="dark" onClick={() => setShowPaymentForm(true)}>
-                          Add New Payment Method
-                        </Button>
-                      </div>
-                    ) : (
-                      paymentMethods.map((payment) => (
-                        <div 
-                          key={payment.id} 
-                          className={`border rounded-lg p-4 relative ${payment.isDefault ? 'border-primary bg-gray-50' : ''}`}
-                        >
-                          {payment.isDefault && (
-                            <div className="absolute top-2 right-2 bg-[#FFFAEB] text-[#FFC90B] text-xs px-2 py-0.5 rounded">
-                              Default Payment Method
-                            </div>
-                          )}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <div className="text-sm text-gray-500">Card Number</div>
-                              <div className="font-medium">**** **** **** {payment.cardNumber.slice(-4)}</div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-gray-500">Cardholder Name</div>
-                              <div>{payment.cardholderName}</div>
-                            </div>
-                            <div>
-                              <div className="text-sm text-gray-500">Expiry Date</div>
-                              <div>{payment.expiryDate}</div>
-                            </div>
-                          </div>
-                          <div className="flex gap-2 mt-4 pt-4 border-t">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => setEditPaymentId(payment.id)}
-                            >
-                              Edit
-                            </Button>
-                            {!payment.isDefault && (
-                              <>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => handleUpdatePaymentMethod(payment.id, {...payment, isDefault: true})}
-                                >
-                                  Set as Default
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => handleDeletePaymentMethod(payment.id)}
-                                >
-                                  Remove
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-
             {/* Notifications Section */}
             {activeSection === "notifications" && (
               <>
@@ -1034,7 +939,7 @@ const UserProfile = () => {
                 </div>
                 
                 <NotificationSettings 
-                  settings={notificationSettings}
+                  initialSettings={notificationSettings}
                   onSave={handleUpdateNotificationSettings}
                 />
               </>

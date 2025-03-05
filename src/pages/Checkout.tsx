@@ -6,39 +6,40 @@ import { AccountSection } from "@/components/checkout/AccountSection";
 import { ShippingAddress } from "@/components/checkout/ShippingAddress";
 import { PaymentInformation } from "@/components/checkout/PaymentInformation";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { AhmadiLogo } from "@/components/AhmadiLogo";
 
 // Mock cart data and user data
 const cartItems = [
   {
     id: 1,
-    name: "BLEU DE CHANEL EAU DE PARFUM",
+    name: "AHMADI ROYAL OUD EAU DE PARFUM",
     size: "100 ML",
-    price: 124.00,
+    price: 6999.00,
     image: "/lovable-uploads/a5a6a3a5-e9a9-4a5a-b43b-98647ccd1fad.png",
     quantity: 1
   },
   {
     id: 2,
-    name: "N°5 CHANEL PARIS EAU DE PARFUM",
+    name: "AHMADI AMBER MUSK EAU DE PARFUM",
     size: "100 ML",
-    price: 124.00,
+    price: 5499.00,
     image: "/lovable-uploads/a5a6a3a5-e9a9-4a5a-b43b-98647ccd1fad.png",
     quantity: 1
   }
 ];
 
 const userInfo = {
-  name: "Christopher Brooks",
-  email: "Christobrooks@gmail.com",
-  phone: "060 4859 5784",
+  name: "Raj Sharma",
+  email: "raj.sharma@gmail.com",
+  phone: "+91 98765 43210",
   address: {
-    street: "15 Oxford Street, Bloomsbury",
-    city: "London",
-    postcode: "W1T 1QF",
-    country: "United Kingdom"
+    street: "204, Sea View Apartments, Carter Road, Bandra West",
+    city: "Mumbai",
+    postcode: "400050",
+    country: "India"
   },
-  paymentMethod: "visa",
-  cardNumber: "**** **** **** 1767"
+  paymentMethod: "paytm",
+  cardNumber: "8765 4321 9012 3456"
 };
 
 const Checkout = () => {
@@ -57,6 +58,13 @@ const Checkout = () => {
 
   return (
     <div className="bg-white min-h-screen">
+      {/* Header with logo */}
+      <div className="bg-gray-50 py-4 border-b border-gray-200">
+        <div className="container mx-auto px-4 flex justify-center">
+          <AhmadiLogo size="medium" />
+        </div>
+      </div>
+      
       {/* Breadcrumb */}
       <div className="border-b border-gray-200">
         <div className="container mx-auto px-4">

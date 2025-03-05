@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AhmadiLogo } from "@/components/AhmadiLogo";
 
 interface CartItem {
   id: number;
@@ -19,53 +20,51 @@ interface OrderSummaryProps {
 
 export const OrderSummary = ({ cartItems, onPlaceOrder }: OrderSummaryProps) => {
   const [note, setNote] = useState("I need it urgently to give to my friend for her birthday in the next 2 days. Hope the shop will help me deliver it as soon as possible. Thanks a lot.");
-  const [promoCode, setPromoCode] = useState("HAPPYHOLIDAYS20");
+  const [promoCode, setPromoCode] = useState("AHMADI20");
 
   const productTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   const shippingCost = 0;
-  const vat = productTotal * 0.1; // 10% VAT
-  const discountAmount = 20; // £20 off with promo code
-  const orderTotal = productTotal + shippingCost - discountAmount;
+  const gst = productTotal * 0.18; // 18% GST
+  const discountAmount = 1000; // ₹1000 off with promo code
+  const orderTotal = productTotal + shippingCost + gst - discountAmount;
 
   return (
     <div className="bg-white border border-gray-200 p-6 rounded-md">
-      <h2 className="text-xl font-medium mb-6">SUMMARY</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-medium">SUMMARY</h2>
+        <AhmadiLogo size="small" />
+      </div>
       
       <div className="space-y-4">
         <div className="flex justify-between">
           <span className="text-gray-600">Product Total ({cartItems.length})</span>
-          <span>£{productTotal.toFixed(2)}</span>
+          <span>₹{productTotal.toFixed(2)}</span>
         </div>
         
         <div className="flex justify-between">
           <span className="text-gray-600">Shipping To</span>
-          <span className="text-gray-600">United Kingdom</span>
+          <span className="text-gray-600">India</span>
         </div>
         
         <div className="flex justify-between">
           <span className="text-gray-600">Shipping Costs</span>
-          <span>£{shippingCost.toFixed(2)}</span>
+          <span>₹{shippingCost.toFixed(2)}</span>
         </div>
         
         <div className="flex justify-between">
-          <span className="text-gray-600">Total without VAT</span>
-          <span>£{productTotal.toFixed(2)}</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-600">Including 10% VAT</span>
-          <span>£{vat.toFixed(2)}</span>
+          <span className="text-gray-600">GST (18%)</span>
+          <span>₹{gst.toFixed(2)}</span>
         </div>
         
         <div className="flex justify-between">
           <span className="text-gray-600">Discount Code</span>
-          <span>-£{discountAmount.toFixed(2)}</span>
+          <span>-₹{discountAmount.toFixed(2)}</span>
         </div>
         
         <div className="border-t border-gray-200 pt-4 mt-4">
           <div className="flex justify-between font-medium text-lg">
             <span>Order Total</span>
-            <span>£{orderTotal.toFixed(2)}</span>
+            <span>₹{orderTotal.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -117,18 +116,18 @@ export const OrderSummary = ({ cartItems, onPlaceOrder }: OrderSummaryProps) => 
       <div className="mt-8 pt-6 border-t border-gray-200">
         <p className="text-sm mb-2">Pay By</p>
         <div className="flex flex-wrap gap-2">
+          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Paytm" className="h-6" />
+          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Google Pay" className="h-6" />
+          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="PhonePe" className="h-6" />
+          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="UPI" className="h-6" />
+          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Net Banking" className="h-6" />
           <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Visa" className="h-6" />
-          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="PayPal" className="h-6" />
           <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Mastercard" className="h-6" />
-          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Apple Pay" className="h-6" />
-          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Klarna" className="h-6" />
-          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Sofort" className="h-6" />
-          <img src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" alt="Giropay" className="h-6" />
         </div>
       </div>
       
       <div className="mt-8">
-        <h3 className="font-medium mb-4">You're in control of Nigedum</h3>
+        <h3 className="font-medium mb-4">Ahmadi Perfumes - Quality Assurance</h3>
         
         <div className="space-y-6">
           <div className="flex">
@@ -138,8 +137,8 @@ export const OrderSummary = ({ cartItems, onPlaceOrder }: OrderSummaryProps) => 
               </svg>
             </div>
             <div>
-              <p className="font-medium">Shipping costs, many discount codes</p>
-              <p className="text-sm text-gray-600">Shipping costs supported by us with the best price</p>
+              <p className="font-medium">Fast delivery across India</p>
+              <p className="text-sm text-gray-600">Shipping within 2-3 business days to all metro cities</p>
             </div>
           </div>
           
@@ -150,8 +149,8 @@ export const OrderSummary = ({ cartItems, onPlaceOrder }: OrderSummaryProps) => 
               </svg>
             </div>
             <div>
-              <p className="font-medium">Free, easy cancellation</p>
-              <p className="text-sm text-gray-600">Cancel your order 30 minutes after checkout, even</p>
+              <p className="font-medium">Easy returns & refunds</p>
+              <p className="text-sm text-gray-600">Hassle-free 7-day return policy with money-back guarantee</p>
             </div>
           </div>
           
@@ -162,8 +161,8 @@ export const OrderSummary = ({ cartItems, onPlaceOrder }: OrderSummaryProps) => 
               </svg>
             </div>
             <div>
-              <p className="font-medium">7-day guarantee</p>
-              <p className="text-sm text-gray-600">Don't love it? Tell us why</p>
+              <p className="font-medium">100% authentic fragrances</p>
+              <p className="text-sm text-gray-600">All perfumes are certified authentic with hologram seal</p>
             </div>
           </div>
         </div>

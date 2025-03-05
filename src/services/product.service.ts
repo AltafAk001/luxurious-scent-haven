@@ -48,7 +48,7 @@ export const productService = {
       .select('*', { count: 'exact' });
     
     // Apply filters
-    if (filters) {
+    /*if (filters) {
       // Category filter
       if (filters.category && filters.category.length > 0) {
         query = query.in('category', filters.category);
@@ -101,7 +101,7 @@ export const productService = {
         );
       }
     }
-    
+    */
     // Pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;

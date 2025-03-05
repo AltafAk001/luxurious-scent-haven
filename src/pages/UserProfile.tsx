@@ -931,18 +931,18 @@ const UserProfile = () => {
               </>
             )}
 
-            {/* Notifications Section */}
+            {/* Notification Settings Section */}
             {activeSection === "notifications" && (
-              <>
+              <div>
                 <div className="flex justify-between items-center mb-6">
                   <h1 className="text-xl font-bold">Notification Settings</h1>
                 </div>
                 
                 <NotificationSettings 
-                  initialSettings={notificationSettings} 
-                  onSave={handleUpdateNotificationSettings} 
+                  initialSettings={notificationSettings}
+                  onSave={handleUpdateNotificationSettings}
                 />
-              </>
+              </div>
             )}
 
             {/* Vouchers Section */}

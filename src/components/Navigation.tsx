@@ -2,16 +2,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X, ShoppingBag, User, LogOut } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { SearchBar } from "@/components/SearchBar";
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
   const { user, signOut } = useAuth();
   const { cart } = useCart();
@@ -26,15 +26,6 @@ export const Navigation = () => {
 
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
-      setIsSearchOpen(false);
-      setSearchQuery("");
-    }
   };
 
   const handleSignOut = async () => {
@@ -89,7 +80,11 @@ export const Navigation = () => {
           {/* Right Icons */}
           <div className="flex items-center space-x-4">
             <Button variant="ghost" onClick={toggleSearch} className="text-white">
-              <Search size={20} />
+              <span className="sr-only">Search</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
             </Button>
             <Link to="/cart" className="text-white hover:text-primary-accent relative">
               <ShoppingBag size={20} />
@@ -186,24 +181,42 @@ export const Navigation = () => {
 
       {/* Search Bar Overlay */}
       {isSearchOpen && (
-        <div className="absolute top-16 left-0 w-full bg-white p-4 shadow-md z-50">
-          <div className="container mx-auto">
-            <form onSubmit={handleSearch} className="flex items-center">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 backdrop-blur-sm flex items-start justify-center pt-16 px-4">
+          <div className="bg-white w-full max-w-3xl rounded-lg shadow-2xl overflow-hidden">
+            <div className="p-4">
+              <SearchBar 
+                onClose={toggleSearch} 
+                isOverlay={true} 
+                placeholder="Search for products, brands, and more..." 
               />
-              <Button type="submit" variant="dark" className="ml-2">
-                Search
-              </Button>
-              <Button variant="ghost" onClick={toggleSearch} className="ml-2">
-                <X size={20} />
-              </Button>
-            </form>
+            </div>
+            <div className="p-4 bg-gray-50 border-t">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div className="text-center p-2 border rounded bg-white hover:border-primary-accent">
+                  <div className="text-xs text-gray-500 mb-1">PERFUME</div>
+                  <div className="text-sm font-medium">Latest Collections</div>
+                </div>
+                <div className="text-center p-2 border rounded bg-white hover:border-primary-accent">
+                  <div className="text-xs text-gray-500 mb-1">MAKEUP</div>
+                  <div className="text-sm font-medium">Best Sellers</div>
+                </div>
+                <div className="text-center p-2 border rounded bg-white hover:border-primary-accent">
+                  <div className="text-xs text-gray-500 mb-1">SKINCARE</div>
+                  <div className="text-sm font-medium">Self Care</div>
+                </div>
+                <div className="text-center p-2 border rounded bg-white hover:border-primary-accent">
+                  <div className="text-xs text-gray-500 mb-1">FRAGRANCE</div>
+                  <div className="text-sm font-medium">Luxury Brands</div>
+                </div>
+              </div>
+            </div>
           </div>
+          <button 
+            onClick={toggleSearch}
+            className="absolute top-4 right-4 text-white hover:text-gray-300"
+          >
+            <X size={24} />
+          </button>
         </div>
       )}
     </header>

@@ -1,15 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useInView } from 'react-intersection-observer';
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { SEO } from "@/components/SEO";
 import { useProducts, ProductFilters } from "@/services/product.service";
 import { useToast } from "@/hooks/use-toast";
-import { Loader, ChevronDown, ChevronUp, Search, Menu } from "lucide-react";
+import { Loader, ChevronDown, ChevronUp, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SearchBar } from "@/components/SearchBar";
 
 // Organize brands by first letter
 const organizeByLetter = (brands: string[]) => {
@@ -681,17 +680,12 @@ const ProductListingPage = () => {
             
             {/* Products Column */}
             <div className="md:col-span-3">
-              {/* Search Bar */}
-              <div className="mb-4">
-                <div className="relative w-full lg:w-2/5 ml-auto">
-                  <Input
-                    placeholder="Search your products, orders, etc..."
-                    value={searchQuery}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    className="pl-10 pr-4 py-2 w-full border rounded-md"
-                  />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                </div>
+              {/* Enhanced Search Bar */}
+              <div className="mb-6">
+                <SearchBar 
+                  className="w-full" 
+                  placeholder="Search perfumes, brands, collections..." 
+                />
               </div>
             
               {/* Product Count and Sort */}

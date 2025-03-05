@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
@@ -218,10 +217,58 @@ export const productService = {
     }
     
     return data || [];
+  },
+  
+  async getSearchSuggestions(query: string): Promise<{products: Product[], categories: string[], brands: string[]}> {
+    if (!query || query.trim().length < 2) {
+      return { products: [], categories: [], brands: [] };
+    }
+    
+    // Get product suggestions
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('id, name, brand, image, price, discount_price, category')
+      .or(`name.ilike.%${query}%,brand.ilike.%${query}%,description.ilike.%${query}%`)
+      .limit(5);
+    
+    if (productsError) {
+      console.error('Error fetching product suggestions:', productsError);
+    }
+    
+    // Get category suggestions
+    const { data: categories, error: categoriesError } = await supabase
+      .from('products')
+      .select('category')
+      .ilike('category', `%${query}%`)
+      .limit(3);
+    
+    if (categoriesError) {
+      console.error('Error fetching category suggestions:', categoriesError);
+    }
+    
+    // Get brand suggestions
+    const { data: brands, error: brandsError } = await supabase
+      .from('products')
+      .select('brand')
+      .ilike('brand', `%${query}%`)
+      .limit(3);
+    
+    if (brandsError) {
+      console.error('Error fetching brand suggestions:', brandsError);
+    }
+    
+    // Extract unique categories and brands
+    const uniqueCategories = Array.from(new Set(categories?.map(item => item.category) || []));
+    const uniqueBrands = Array.from(new Set(brands?.map(item => item.brand) || []));
+    
+    return {
+      products: products || [],
+      categories: uniqueCategories.filter(Boolean),
+      brands: uniqueBrands.filter(Boolean)
+    };
   }
 };
 
-// React Query hooks for better data fetching and caching
 export const useProducts = (page = 1, pageSize = 8, filters?: ProductFilters) => {
   return useQuery({
     queryKey: ['products', page, pageSize, filters],
@@ -278,5 +325,14 @@ export const useRelatedProducts = (productId: number, category?: string, brand?:
     queryFn: () => productService.getRelatedProducts(productId, category, brand),
     enabled: !!productId,
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+export const useSearchSuggestions = (query: string) => {
+  return useQuery({
+    queryKey: ['searchSuggestions', query],
+    queryFn: () => productService.getSearchSuggestions(query),
+    enabled: query.trim().length >= 2,
+    staleTime: 1 * 60 * 1000, // 1 minute
   });
 };

@@ -1,4 +1,4 @@
-
+<lov-code>
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, Navigate } from "react-router-dom";
@@ -15,6 +15,7 @@ import { PaymentMethodForm } from "@/components/profile/PaymentMethodForm";
 import { AccountDetailsForm } from "@/components/profile/AccountDetailsForm";
 import { NotificationSettings } from "@/components/profile/NotificationSettings";
 import { VoucherList } from "@/components/profile/VoucherList";
+import { Switch } from "@/components/ui/switch";
 
 // Types
 interface PurchaseItem {
@@ -416,304 +417,286 @@ const UserProfile = () => {
 
   // Main render function begins here
   return (
-    <div className="container mx-auto py-8 bg-white min-h-screen">
-      <div className="md:hidden flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">My Account</h1>
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <div className="mt-6 space-y-6">
+    <div className="bg-white min-h-screen">
+      <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        {/* Mobile Header */}
+        <div className="md:hidden flex justify-between items-center mb-4">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="mr-2">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+              <div className="py-4">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b">
+                  <Avatar className="h-14 w-14">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${firstName} ${lastName}`} />
+                    <AvatarFallback>{firstName.charAt(0)}{lastName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h2 className="font-semibold">{firstName} {lastName}</h2>
+                    <button 
+                      className="text-xs text-gray-500 underline"
+                      onClick={() => {
+                        setActiveSection("account");
+                        setShowAccountForm(true);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      MANAGE ACCOUNT
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="mb-3 font-semibold text-sm">Account Settings</div>
+                
+                <nav className="space-y-1">
+                  <button
+                    onClick={() => {
+                      setActiveSection("purchases");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                      activeSection === "purchases" ? "bg-gray-100 font-medium" : "text-gray-600"
+                    }`}
+                  >
+                    My Purchase
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setActiveSection("notifications");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                      activeSection === "notifications" ? "bg-gray-100 font-medium" : "text-gray-600"
+                    }`}
+                  >
+                    Notifications
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setActiveSection("vouchers");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                      activeSection === "vouchers" ? "bg-gray-100 font-medium" : "text-gray-600"
+                    }`}
+                  >
+                    My Vouchers
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setActiveSection("payment");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                      activeSection === "payment" ? "bg-gray-100 font-medium" : "text-gray-600"
+                    }`}
+                  >
+                    Payment Methods
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setActiveSection("addresses");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                      activeSection === "addresses" ? "bg-gray-100 font-medium" : "text-gray-600"
+                    }`}
+                  >
+                    Address Book
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setActiveSection("account");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                      activeSection === "account" ? "bg-gray-100 font-medium" : "text-gray-600"
+                    }`}
+                  >
+                    Account Details
+                  </button>
+                </nav>
+                
+                <div className="mt-6 pt-6 border-t">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center w-full px-2 py-2 text-sm text-gray-600 rounded-md hover:bg-gray-100"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <h1 className="text-xl font-bold">My Account</h1>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Left Sidebar */}
+          <div className="hidden md:block w-full md:w-1/4 lg:w-1/5">
+            <div className="sticky top-4">
               <div className="flex items-center gap-4 mb-6">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${firstName} ${lastName}`} />
                   <AvatarFallback>{firstName.charAt(0)}{lastName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h2 className="text-lg font-semibold">{firstName} {lastName}</h2>
-                  <Button 
-                    variant="link" 
-                    className="text-sm text-gray-500 p-0 h-auto"
+                  <h2 className="font-semibold">{firstName} {lastName}</h2>
+                  <button 
+                    className="text-xs text-[#FFC90B] hover:underline"
                     onClick={() => {
-                      setMobileMenuOpen(false);
                       setActiveSection("account");
                       setShowAccountForm(true);
                     }}
                   >
                     MANAGE ACCOUNT
-                  </Button>
+                  </button>
                 </div>
               </div>
               
-              <nav className="space-y-2 border-t pt-4">
-                <h3 className="text-md font-semibold mb-3">Account Settings</h3>
-                
-                <button 
-                  className="flex items-center justify-between py-2 w-full text-left hover:text-primary-dark font-medium"
-                  onClick={() => {
-                    setActiveSection("purchases");
-                    setMobileMenuOpen(false);
-                  }}
+              <div className="text-sm font-semibold mb-2">Account Settings</div>
+              
+              <nav className="space-y-1">
+                <button
+                  onClick={() => setActiveSection("purchases")}
+                  className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                    activeSection === "purchases" ? "bg-gray-100 font-medium" : "text-gray-600"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <ShoppingBag className="h-4 w-4" />
-                    <span>My Purchase</span>
-                  </div>
+                  My Purchase
                 </button>
                 
-                <button 
-                  className="flex items-center justify-between py-2 w-full text-left text-gray-500 hover:text-primary-dark"
-                  onClick={() => {
-                    setActiveSection("account");
-                    setMobileMenuOpen(false);
-                  }}
+                <button
+                  onClick={() => setActiveSection("notifications")}
+                  className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                    activeSection === "notifications" ? "bg-gray-100 font-medium" : "text-gray-600"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span>Account Details</span>
-                  </div>
+                  Notifications
                 </button>
                 
-                <button 
-                  className="flex items-center justify-between py-2 w-full text-left text-gray-500 hover:text-primary-dark"
-                  onClick={() => {
-                    setActiveSection("notifications");
-                    setMobileMenuOpen(false);
-                  }}
+                <button
+                  onClick={() => setActiveSection("vouchers")}
+                  className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                    activeSection === "vouchers" ? "bg-gray-100 font-medium" : "text-gray-600"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Bell className="h-4 w-4" />
-                    <span>Notifications</span>
-                  </div>
+                  My Vouchers
                 </button>
                 
-                <button 
-                  className="flex items-center justify-between py-2 w-full text-left text-gray-500 hover:text-primary-dark"
-                  onClick={() => {
-                    setActiveSection("vouchers");
-                    setMobileMenuOpen(false);
-                  }}
+                <button
+                  onClick={() => setActiveSection("payment")}
+                  className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                    activeSection === "payment" ? "bg-gray-100 font-medium" : "text-gray-600"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Ticket className="h-4 w-4" />
-                    <span>My Vouchers</span>
-                  </div>
+                  Payment Methods
                 </button>
                 
-                <button 
-                  className="flex items-center justify-between py-2 w-full text-left text-gray-500 hover:text-primary-dark"
-                  onClick={() => {
-                    setActiveSection("payment");
-                    setMobileMenuOpen(false);
-                  }}
+                <button
+                  onClick={() => setActiveSection("addresses")}
+                  className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                    activeSection === "addresses" ? "bg-gray-100 font-medium" : "text-gray-600"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" />
-                    <span>Payment Methods</span>
-                  </div>
+                  Address Book
                 </button>
                 
-                <button 
-                  className="flex items-center justify-between py-2 w-full text-left text-gray-500 hover:text-primary-dark"
-                  onClick={() => {
-                    setActiveSection("addresses");
-                    setMobileMenuOpen(false);
-                  }}
+                <button
+                  onClick={() => setActiveSection("account")}
+                  className={`flex items-center w-full px-2 py-2 text-sm rounded-md ${
+                    activeSection === "account" ? "bg-gray-100 font-medium" : "text-gray-600"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>Address Book</span>
-                  </div>
-                </button>
-                
-                <div className="border-t my-4"></div>
-                
-                <button 
-                  onClick={handleLogout}
-                  className="flex items-center w-full py-2 text-gray-500 hover:text-primary-dark"
-                >
-                  <span>Logout</span>
+                  Account Details
                 </button>
               </nav>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Sidebar */}
-        <div className="w-full md:w-1/4 hidden md:block">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-4 mb-6">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${firstName} ${lastName}`} />
-                <AvatarFallback>{firstName.charAt(0)}{lastName.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-lg font-semibold">{firstName} {lastName}</h2>
-                <button 
-                  className="text-sm text-gray-500 hover:underline"
-                  onClick={() => {
-                    setActiveSection("account");
-                    setShowAccountForm(true);
-                  }}
+              
+              <div className="mt-6 pt-6 border-t">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-2 py-2 text-sm text-gray-600 rounded-md hover:bg-gray-100"
                 >
-                  MANAGE ACCOUNT
+                  Sign Out
                 </button>
               </div>
             </div>
-            
-            <nav className="space-y-2 border-t pt-4">
-              <h3 className="text-md font-semibold mb-3">Account Settings</h3>
-              
-              <button 
-                onClick={() => setActiveSection("purchases")} 
-                className={`flex items-center justify-between py-2 w-full text-left ${activeSection === "purchases" ? "text-primary-dark font-medium" : "text-gray-500 hover:text-primary-dark"}`}
-              >
-                <div className="flex items-center gap-2">
-                  <ShoppingBag className="h-4 w-4" />
-                  <span>My Purchase</span>
-                </div>
-                {activeSection === "purchases" && <ChevronRight className="h-4 w-4" />}
-              </button>
-              
-              <button 
-                onClick={() => setActiveSection("account")} 
-                className={`flex items-center justify-between py-2 w-full text-left ${activeSection === "account" ? "text-primary-dark font-medium" : "text-gray-500 hover:text-primary-dark"}`}
-              >
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Account Details</span>
-                </div>
-                {activeSection === "account" && <ChevronRight className="h-4 w-4" />}
-              </button>
-              
-              <button 
-                onClick={() => setActiveSection("notifications")} 
-                className={`flex items-center justify-between py-2 w-full text-left ${activeSection === "notifications" ? "text-primary-dark font-medium" : "text-gray-500 hover:text-primary-dark"}`}
-              >
-                <div className="flex items-center gap-2">
-                  <Bell className="h-4 w-4" />
-                  <span>Notifications</span>
-                </div>
-                {activeSection === "notifications" && <ChevronRight className="h-4 w-4" />}
-              </button>
-              
-              <button 
-                onClick={() => setActiveSection("vouchers")} 
-                className={`flex items-center justify-between py-2 w-full text-left ${activeSection === "vouchers" ? "text-primary-dark font-medium" : "text-gray-500 hover:text-primary-dark"}`}
-              >
-                <div className="flex items-center gap-2">
-                  <Ticket className="h-4 w-4" />
-                  <span>My Vouchers</span>
-                </div>
-                {activeSection === "vouchers" && <ChevronRight className="h-4 w-4" />}
-              </button>
-              
-              <button 
-                onClick={() => setActiveSection("payment")} 
-                className={`flex items-center justify-between py-2 w-full text-left ${activeSection === "payment" ? "text-primary-dark font-medium" : "text-gray-500 hover:text-primary-dark"}`}
-              >
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" />
-                  <span>Payment Methods</span>
-                </div>
-                {activeSection === "payment" && <ChevronRight className="h-4 w-4" />}
-              </button>
-              
-              <button 
-                onClick={() => setActiveSection("addresses")} 
-                className={`flex items-center justify-between py-2 w-full text-left ${activeSection === "addresses" ? "text-primary-dark font-medium" : "text-gray-500 hover:text-primary-dark"}`}
-              >
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>Address Book</span>
-                </div>
-                {activeSection === "addresses" && <ChevronRight className="h-4 w-4" />}
-              </button>
-              
-              <div className="border-t my-4"></div>
-              
-              <button 
-                onClick={handleLogout}
-                className="flex items-center w-full py-2 text-gray-500 hover:text-primary-dark"
-              >
-                <span>Logout</span>
-              </button>
-            </nav>
           </div>
-        </div>
-        
-        {/* Main Content */}
-        <div className="w-full md:w-3/4">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          
+          {/* Main Content */}
+          <div className="w-full md:w-3/4 lg:w-4/5">
             {/* Purchases Section */}
             {activeSection === "purchases" && (
-              <>
-                <div className="flex justify-between items-center mb-6">
+              <div>
+                <div className="flex justify-between items-center mb-4">
                   <h1 className="text-xl font-bold">My Purchase</h1>
-                  <div>
-                    <span className="text-sm">Hi, <span className="font-semibold text-[#fdc400]">{firstName} {lastName}</span></span>
+                  <div className="text-sm">
+                    Hi, <span className="text-[#FFC90B] font-medium">{firstName} {lastName}</span>
                   </div>
                 </div>
                 
-                {/* Filter Tabs */}
-                <div className="flex flex-wrap border-b mb-4">
-                  <button 
-                    onClick={() => setActiveTab("all")} 
-                    className={`px-4 py-2 text-sm ${activeTab === "all" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
+                {/* Tabs Navigation */}
+                <div className="flex overflow-x-auto no-scrollbar border-b mb-4">
+                  <button
+                    onClick={() => setActiveTab("all")}
+                    className={`whitespace-nowrap px-4 py-2 text-sm ${activeTab === "all" ? "border-b-2 border-black font-medium" : "text-gray-500"}`}
                   >
                     All Purchases
                   </button>
-                  <button 
-                    onClick={() => setActiveTab("topay")} 
-                    className={`px-4 py-2 text-sm ${activeTab === "topay" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
+                  <button
+                    onClick={() => setActiveTab("topay")}
+                    className={`whitespace-nowrap px-4 py-2 text-sm ${activeTab === "topay" ? "border-b-2 border-black font-medium" : "text-gray-500"}`}
                   >
                     To Pay ({getStatusCount("topay")})
                   </button>
-                  <button 
-                    onClick={() => setActiveTab("toshipping")} 
-                    className={`px-4 py-2 text-sm ${activeTab === "toshipping" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
+                  <button
+                    onClick={() => setActiveTab("toshipping")}
+                    className={`whitespace-nowrap px-4 py-2 text-sm ${activeTab === "toshipping" ? "border-b-2 border-black font-medium" : "text-gray-500"}`}
                   >
                     To Shipping ({getStatusCount("toshipping")})
                   </button>
-                  <button 
-                    onClick={() => setActiveTab("toreceive")} 
-                    className={`px-4 py-2 text-sm ${activeTab === "toreceive" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
+                  <button
+                    onClick={() => setActiveTab("toreceive")}
+                    className={`whitespace-nowrap px-4 py-2 text-sm ${activeTab === "toreceive" ? "border-b-2 border-black font-medium" : "text-gray-500"}`}
                   >
                     To Receive ({getStatusCount("toreceive")})
                   </button>
-                  <button 
-                    onClick={() => setActiveTab("completed")} 
-                    className={`px-4 py-2 text-sm ${activeTab === "completed" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
+                  <button
+                    onClick={() => setActiveTab("completed")}
+                    className={`whitespace-nowrap px-4 py-2 text-sm ${activeTab === "completed" ? "border-b-2 border-black font-medium" : "text-gray-500"}`}
                   >
                     Completed
                   </button>
-                  <button 
-                    onClick={() => setActiveTab("cancelled")} 
-                    className={`px-4 py-2 text-sm ${activeTab === "cancelled" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
+                  <button
+                    onClick={() => setActiveTab("cancelled")}
+                    className={`whitespace-nowrap px-4 py-2 text-sm ${activeTab === "cancelled" ? "border-b-2 border-black font-medium" : "text-gray-500"}`}
                   >
                     Cancelled
                   </button>
-                  <button 
-                    onClick={() => setActiveTab("returnrefund")} 
-                    className={`px-4 py-2 text-sm ${activeTab === "returnrefund" ? "border-b-2 border-black font-semibold" : "text-gray-500"}`}
+                  <button
+                    onClick={() => setActiveTab("returnrefund")}
+                    className={`whitespace-nowrap px-4 py-2 text-sm ${activeTab === "returnrefund" ? "border-b-2 border-black font-medium" : "text-gray-500"}`}
                   >
                     Return/Refund
                   </button>
                 </div>
                 
                 {/* Search Bar */}
-                <div className="mb-6 flex">
-                  <div className="relative w-full md:w-1/2 ml-auto">
+                <div className="mb-4">
+                  <div className="relative w-full lg:w-2/5 ml-auto">
                     <Input
                       placeholder="Search your products, orders, etc..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 pr-4 py-2 w-full border rounded-md"
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   </div>
@@ -723,7 +706,7 @@ const UserProfile = () => {
                   Manage and review your past shopping experiences for you
                 </div>
                 
-                {/* Purchase Items */}
+                {/* Order cards */}
                 <div className="space-y-6">
                   {filteredPurchases.length === 0 ? (
                     <div className="text-center py-10">
@@ -734,82 +717,80 @@ const UserProfile = () => {
                     </div>
                   ) : (
                     filteredPurchases.map((item) => (
-                      <div key={item.id} className="border rounded-lg bg-gray-50 overflow-hidden">
-                        {/* Status Header */}
-                        <div className="bg-white p-4 border-b flex justify-between">
+                      <div key={item.id} className="bg-white border rounded-md overflow-hidden">
+                        <div className="p-3 border-b flex justify-between bg-gray-50">
                           <div className="font-medium">{item.status}</div>
                           {item.isBeingPaid && (
-                            <div className="text-[#fdc400] bg-[#fffaeb] px-2 py-0.5 rounded text-sm">
+                            <div className="bg-[#FFFAEB] text-[#FFC90B] text-xs px-2 py-0.5 rounded flex items-center">
+                              <div className="w-2 h-2 rounded-full bg-[#FFC90B] mr-1.5"></div>
                               Order is pending payment
                             </div>
                           )}
                           {item.isBeingShipped && (
-                            <div className="text-[#fdc400] bg-[#fffaeb] px-2 py-0.5 rounded text-sm">
+                            <div className="bg-[#FFFAEB] text-[#FFC90B] text-xs px-2 py-0.5 rounded flex items-center">
+                              <div className="w-2 h-2 rounded-full bg-[#FFC90B] mr-1.5"></div>
                               Your order is being prepared
                             </div>
                           )}
                           {item.hasBeenTransferredToShipping && (
-                            <div className="text-[#fdc400] bg-[#fffaeb] px-2 py-0.5 rounded text-sm">
+                            <div className="bg-[#FFFAEB] text-[#FFC90B] text-xs px-2 py-0.5 rounded flex items-center">
+                              <div className="w-2 h-2 rounded-full bg-[#FFC90B] mr-1.5"></div>
                               The order has been transferred to the shipping unit
                             </div>
                           )}
                         </div>
                         
-                        {/* Product Details */}
-                        <div className="p-4 flex flex-col md:flex-row gap-4">
-                          <div className="md:w-1/6">
-                            <div className="bg-white border rounded-md p-2 flex items-center justify-center h-24">
-                              <img src={item.image} alt={item.productName} className="h-20 w-20 object-contain" />
+                        <div className="p-4">
+                          <div className="flex items-center gap-4">
+                            <div className="border rounded-md p-2 w-24 h-24 flex items-center justify-center shrink-0">
+                              <img src={item.image} alt={item.productName} className="max-w-full max-h-full object-contain"/>
+                            </div>
+                            <div className="flex-grow">
+                              <div className="text-sm text-gray-500 uppercase">{item.brand}</div>
+                              <div className="font-medium">{item.productName}</div>
+                              <div className="text-sm text-gray-500">{item.size}</div>
+                            </div>
+                            <div className="text-right">
+                              {item.originalPrice && (
+                                <div className="text-sm text-gray-400 line-through">£{item.originalPrice.toFixed(2)}</div>
+                              )}
+                              <div className="font-semibold">£{item.price.toFixed(2)}</div>
                             </div>
                           </div>
                           
-                          <div className="md:w-3/6">
-                            <div className="text-gray-500 text-sm mb-1">{item.brand}</div>
-                            <div className="font-medium mb-1">{item.productName}</div>
-                            <div className="text-gray-500 text-sm">{item.size}</div>
-                          </div>
-                          
-                          <div className="md:w-2/6 flex flex-col items-end">
-                            {item.originalPrice && (
-                              <div className="text-gray-400 line-through text-sm">£{item.originalPrice.toFixed(2)}</div>
-                            )}
-                            <div className="font-semibold">£{item.price.toFixed(2)}</div>
-                          </div>
-                        </div>
-                        
-                        {/* Order Summary & Actions */}
-                        <div className="bg-white p-4 border-t flex flex-col md:flex-row justify-between items-center">
-                          <div className="flex flex-wrap gap-2">
-                            <button className="text-sm border border-gray-300 rounded-md px-4 py-1 hover:bg-gray-50">
-                              VIEW ORDER DETAILS
-                            </button>
-                            <button className="text-sm border border-gray-300 rounded-md px-4 py-1 hover:bg-gray-50">
-                              Chat with customer support
-                            </button>
-                          </div>
-                          
-                          <div className="flex flex-col items-end mt-4 md:mt-0">
-                            <div className="text-sm text-gray-500">Order Total:</div>
-                            <div className="font-semibold">£{item.price.toFixed(2)}</div>
+                          <div className="flex justify-between items-center mt-4 pt-4 border-t">
+                            <div className="flex flex-wrap gap-2">
+                              <button className="text-xs border border-gray-300 rounded px-3 py-1 hover:bg-gray-50">
+                                VIEW ORDER DETAILS
+                              </button>
+                              <button className="text-xs border border-gray-300 rounded px-3 py-1 hover:bg-gray-50">
+                                Chat with customer support
+                              </button>
+                            </div>
                             
-                            {item.status === "To Pay" && (
-                              <Button variant="dark" size="sm" className="mt-2 bg-black text-white">
-                                PAY NOW
-                              </Button>
-                            )}
-                            
-                            {item.status === "To Shipping" && (
-                              <Button variant="outline" size="sm" className="mt-2 border-black text-black">
-                                CANCEL ORDER
-                              </Button>
-                            )}
+                            <div className="text-right">
+                              <div className="text-xs text-gray-500">Order Total:</div>
+                              <div className="font-semibold">£{item.price.toFixed(2)}</div>
+                              
+                              {item.status === "To Pay" && (
+                                <Button variant="dark" size="sm" className="mt-2 bg-black text-white px-4 py-1 h-auto text-xs">
+                                  PAY NOW
+                                </Button>
+                              )}
+                              
+                              {item.status === "To Shipping" && (
+                                <Button variant="outline" size="sm" className="mt-2 border-black text-black px-4 py-1 h-auto text-xs">
+                                  CANCEL ORDER
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     ))
                   )}
                 </div>
-              </>
+              </div>
             )}
 
             {/* Account Details Section */}
@@ -903,159 +884,4 @@ const UserProfile = () => {
                           className={`border rounded-lg p-4 relative ${address.isDefault ? 'border-primary bg-gray-50' : ''}`}
                         >
                           {address.isDefault && (
-                            <div className="absolute top-2 right-2 bg-primary-accent text-primary-dark text-xs px-2 py-0.5 rounded">
-                              Default
-                            </div>
-                          )}
-                          
-                          <div className="mb-2 font-medium">{address.name}</div>
-                          <div className="text-gray-600 mb-4">
-                            <div>{address.street}</div>
-                            <div>{address.city}, {address.state} {address.zipCode}</div>
-                            <div>{address.country}</div>
-                          </div>
-                          
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => setEditAddressId(address.id)}
-                            >
-                              Edit
-                            </Button>
-                            {!address.isDefault && (
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => handleDeleteAddress(address.id)}
-                              >
-                                Delete
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Payment Methods Section */}
-            {activeSection === "payment" && (
-              <>
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-xl font-bold">Payment Methods</h1>
-                  {!showPaymentForm && !editPaymentId && (
-                    <Button variant="dark" onClick={() => setShowPaymentForm(true)}>
-                      Add New Payment Method
-                    </Button>
-                  )}
-                </div>
-                
-                {showPaymentForm ? (
-                  <PaymentMethodForm 
-                    onSave={handleAddPaymentMethod}
-                    onCancel={() => setShowPaymentForm(false)}
-                  />
-                ) : editPaymentId ? (
-                  <PaymentMethodForm 
-                    editPaymentMethod={paymentMethods.find(p => p.id === editPaymentId)}
-                    onSave={(updatedPayment) => handleUpdatePaymentMethod(editPaymentId, updatedPayment)}
-                    onCancel={() => setEditPaymentId(null)}
-                  />
-                ) : (
-                  <div className="space-y-4">
-                    {paymentMethods.length === 0 ? (
-                      <div className="text-center py-10 border rounded-lg">
-                        <p className="text-gray-500 mb-4">You don't have any payment methods saved</p>
-                        <Button variant="dark" onClick={() => setShowPaymentForm(true)}>
-                          Add New Payment Method
-                        </Button>
-                      </div>
-                    ) : (
-                      paymentMethods.map((payment) => (
-                        <div 
-                          key={payment.id} 
-                          className={`border rounded-lg p-4 relative ${payment.isDefault ? 'border-primary bg-gray-50' : ''}`}
-                        >
-                          {payment.isDefault && (
-                            <div className="absolute top-2 right-2 bg-primary-accent text-primary-dark text-xs px-2 py-0.5 rounded">
-                              Default
-                            </div>
-                          )}
-                          
-                          <div className="flex items-center mb-2">
-                            <CreditCard className="h-6 w-6 mr-2" />
-                            <span className="font-medium">•••• {payment.cardNumber.slice(-4)}</span>
-                          </div>
-                          
-                          <div className="text-gray-600 mb-4">
-                            <div>{payment.cardholderName}</div>
-                            <div>Expires: {payment.expiryDate}</div>
-                          </div>
-                          
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => setEditPaymentId(payment.id)}
-                            >
-                              Edit
-                            </Button>
-                            {!payment.isDefault && (
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => handleDeletePaymentMethod(payment.id)}
-                              >
-                                Delete
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Notifications Section */}
-            {activeSection === "notifications" && (
-              <>
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-xl font-bold">Notification Settings</h1>
-                </div>
-                
-                <NotificationSettings 
-                  initialSettings={notificationSettings}
-                  onSave={handleUpdateNotificationSettings}
-                />
-              </>
-            )}
-
-            {/* Vouchers Section */}
-            {activeSection === "vouchers" && (
-              <>
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-xl font-bold">My Vouchers</h1>
-                </div>
-                
-                <div className="mb-6">
-                  <p className="text-sm text-gray-500">
-                    Use your vouchers during checkout to get discounts and special offers
-                  </p>
-                </div>
-                
-                <VoucherList vouchers={vouchers} />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default UserProfile;
+                            <div className="absolute top-

@@ -1,8 +1,11 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductDetailsProps {
   product: {
@@ -19,7 +22,13 @@ interface ProductDetailsProps {
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(
+    product.sizes && product.sizes.length > 0 ? product.sizes[0] : null
+  );
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   const incrementQuantity = () => {
     setQuantity(quantity + 1);
@@ -35,6 +44,55 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     setSelectedSize(size);
   };
 
+  const handleAddToCart = async () => {
+    if (product.sizes?.length && !selectedSize) {
+      toast({
+        variant: "destructive",
+        title: "Please select a size",
+        description: "You must select a size before adding to cart",
+      });
+      return;
+    }
+    
+    try {
+      setIsAddingToCart(true);
+      await addToCart(product.id, quantity);
+      
+      // Show success message with navigation options
+      toast({
+        title: "Added to bag",
+        description: "Your item has been added to your shopping bag",
+        action: (
+          <div className="flex space-x-2 mt-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate('/cart')}
+            >
+              View Bag
+            </Button>
+            <Button 
+              variant="dark" 
+              size="sm" 
+              onClick={() => navigate('/checkout')}
+            >
+              Checkout
+            </Button>
+          </div>
+        ),
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const handleBuyNow = () => {
+    handleAddToCart();
+    navigate('/checkout');
+  };
+
   return (
     <div className="lg:w-1/2">
       <h1 className="text-2xl font-semibold text-gray-800 mb-2">{product.name}</h1>
@@ -44,12 +102,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
       <div className="flex items-center mb-4">
         {product.discountPrice && (
           <>
-            <span className="text-gray-500 line-through mr-2">£{product.price.toFixed(2)}</span>
-            <span className="text-primary-dark text-lg font-semibold">£{product.discountPrice.toFixed(2)}</span>
+            <span className="text-gray-500 line-through mr-2">₹{product.price.toFixed(2)}</span>
+            <span className="text-primary-dark text-lg font-semibold">₹{product.discountPrice.toFixed(2)}</span>
           </>
         )}
         {!product.discountPrice && (
-          <span className="text-primary-dark text-lg font-semibold">£{product.price.toFixed(2)}</span>
+          <span className="text-primary-dark text-lg font-semibold">₹{product.price.toFixed(2)}</span>
         )}
       </div>
 
@@ -98,8 +156,9 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
           <Input
             type="number"
             value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value))}
+            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
             className="w-20 text-center"
+            min="1"
           />
           <Button variant="outline" size="icon" onClick={incrementQuantity}>
             +
@@ -107,10 +166,26 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
         </div>
       </div>
 
-      {/* Add to Cart Button */}
-      <Button variant="dark" className="w-full uppercase">
-        Add to Bag
-      </Button>
+      {/* Action Buttons */}
+      <div className="flex flex-col space-y-3">
+        <Button 
+          variant="dark" 
+          className="w-full uppercase" 
+          onClick={handleAddToCart}
+          disabled={isAddingToCart}
+        >
+          {isAddingToCart ? "Adding..." : "Add to Bag"}
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="w-full uppercase" 
+          onClick={handleBuyNow}
+          disabled={isAddingToCart}
+        >
+          Buy Now
+        </Button>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { AccountSection } from "@/components/checkout/AccountSection";
@@ -7,8 +7,9 @@ import { ShippingAddress } from "@/components/checkout/ShippingAddress";
 import { PaymentInformation } from "@/components/checkout/PaymentInformation";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { AhmadiLogo } from "@/components/AhmadiLogo";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock cart data and user data
+// Mock cart data
 const cartItems = [
   {
     id: 1,
@@ -28,7 +29,8 @@ const cartItems = [
   }
 ];
 
-const userInfo = {
+// Default user info
+const defaultUserInfo = {
   name: "Raj Sharma",
   email: "raj.sharma@gmail.com",
   phone: "+91 98765 43210",
@@ -43,10 +45,33 @@ const userInfo = {
 };
 
 const Checkout = () => {
+  const [userInfo, setUserInfo] = useState(defaultUserInfo);
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Get payment info from session storage if available
+  useEffect(() => {
+    const savedPaymentInfo = sessionStorage.getItem('paymentInfo');
+    if (savedPaymentInfo) {
+      try {
+        const paymentInfo = JSON.parse(savedPaymentInfo);
+        setUserInfo(prev => ({
+          ...prev,
+          paymentMethod: paymentInfo.paymentMethod,
+          cardNumber: paymentInfo.cardNumber
+        }));
+      } catch (error) {
+        console.error('Error parsing payment info:', error);
+      }
+    }
+  }, []);
 
   const handlePlaceOrder = () => {
     // Would normally handle payment processing here
+    toast({
+      title: "Order Placed Successfully",
+      description: "Your order has been confirmed and will be shipped soon.",
+    });
     navigate("/order-confirmation");
   };
 

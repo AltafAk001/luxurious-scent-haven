@@ -14,11 +14,11 @@ export const PaymentInformation = ({ userInfo }: PaymentInformationProps) => {
   const getPaymentIcon = (method: string) => {
     switch (method) {
       case "paytm":
-        return "/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png"; // Replace with actual Paytm icon
+        return "/lovable-uploads/fa14be45-6a8f-4469-8aba-e4169ebf59a9.png"; // Paytm icon
       case "gpay":
-        return "/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png"; // Replace with actual GPay icon
+        return "/lovable-uploads/f846f329-bd76-4c4a-bc15-54f13cbb916f.png"; // GPay icon
       case "phonepe":
-        return "/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png"; // Replace with actual PhonePe icon
+        return "/lovable-uploads/9fe406ef-b60a-4298-beaf-4d1b81da3da2.png"; // PhonePe icon
       case "visa":
       default:
         return "/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png"; // Visa logo

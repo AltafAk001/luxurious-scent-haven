@@ -5,6 +5,7 @@ import ProductListingPage from "./pages/ProductListingPage";
 import ProductPage from "./pages/ProductPage";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import CheckoutPayment from "./pages/CheckoutPayment";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
@@ -28,6 +29,7 @@ function App() {
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/checkout/payment" element={<CheckoutPayment />} />
               <Route path="/order-confirmation" element={<OrderConfirmation />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />

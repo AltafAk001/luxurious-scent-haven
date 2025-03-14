@@ -6,60 +6,60 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Product } from "@/services/product.service";
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
+import { ProductCard } from "./MustHaveBestSellers";
 
-export function SaleOffBestPrices() {
-  const products = [
-    {
-      id: 1,
-      name: "CHANCE EAU TENDRE EAU DE PARFUM 100ML",
-      brand: "CHANEL",
-      price: 76.60,
-      originalPrice: 156.00,
-      discount: 40,
-      image: "https://images.unsplash.com/photo-1541643600914-78b084683601?ixlib=rb-4.0.3",
-      gender: "FOR WOMEN",
-    },
-    {
-      id: 2,
-      name: "VOCE VIVA EAU DE PARFUM",
-      brand: "VALENTINO",
-      price: 100.00,
-      originalPrice: 178.95,
-      discount: 25,
-      image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?ixlib=rb-4.0.3",
-      gender: "FOR WOMEN",
-    },
-    {
-      id: 3,
-      name: "DIOR HOMME EAU DE TOILETTE",
-      brand: "DIOR",
-      price: 95.20,
-      originalPrice: 158.95,
-      discount: 30,
-      image: "https://images.unsplash.com/photo-1592945403244-b3faa7b3a4e1?ixlib=rb-4.0.3",
-      gender: "FOR MEN",
-    },
-    {
-      id: 4,
-      name: "BOSS BOTTLED. NIGHT. EAU DE TOILETTE 100ML",
-      brand: "HUGO BOSS",
-      price: 67.50,
-      originalPrice: 99.00,
-      discount: 34,
-      image: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?ixlib=rb-4.0.3",
-      gender: "FOR MEN",
-    },
-    {
-      id: 5,
-      name: "VERY GOOD GIRL EAU DE PARFUM 80ML",
-      brand: "CAROLINA HERRERA",
-      price: 78.40,
-      originalPrice: 143.95,
-      discount: 20,
-      image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?ixlib=rb-4.0.3",
-      gender: "FOR WOMEN",
-    },
-  ];
+interface SaleOffBestPricesProps {
+  products: Product[];
+  isLoading: boolean;
+}
+
+export function SaleOffBestPrices({ products, isLoading }: SaleOffBestPricesProps) {
+  if (isLoading) {
+    return (
+      <section className="py-12 md:py-16 bg-secondary-light">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <Skeleton className="h-8 w-40 mb-2" />
+              <Skeleton className="h-10 w-60" />
+            </div>
+            <Skeleton className="h-10 w-24" />
+          </div>
+          
+          <div className="hidden md:block">
+            <div className="grid grid-cols-5 gap-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="space-y-3">
+                  <Skeleton className="aspect-square w-full" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="md:hidden grid grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="space-y-3">
+                <Skeleton className="aspect-square w-full" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-24" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+  
+  // Filter for products with a discount
+  const discountedProducts = products.filter(product => product.discount_price);
 
   return (
     <section className="py-12 md:py-16 bg-secondary-light">
@@ -69,9 +69,11 @@ export function SaleOffBestPrices() {
             <span className="text-button-lg text-secondary-medium mb-2 block">SALE OFF</span>
             <h2 className="text-h2 md:text-display-2">BEST PRICES</h2>
           </div>
-          <button className="text-button-lg hover:text-primary-accent duration-200">
-            VIEW ALL →
-          </button>
+          <Link to="/products?hasDiscount=true">
+            <Button variant="link" className="text-button-lg hover:text-primary-accent duration-200">
+              VIEW ALL →
+            </Button>
+          </Link>
         </div>
         
         {/* Desktop Carousel (hidden on mobile) */}
@@ -84,7 +86,7 @@ export function SaleOffBestPrices() {
             className="w-full"
           >
             <CarouselContent className="-ml-4">
-              {products.map((product) => (
+              {discountedProducts.map((product) => (
                 <CarouselItem key={product.id} className="pl-4 basis-1/5">
                   <SaleProductCard product={product} />
                 </CarouselItem>
@@ -97,7 +99,7 @@ export function SaleOffBestPrices() {
 
         {/* Mobile Grid (hidden on desktop) */}
         <div className="md:hidden grid grid-cols-2 gap-4">
-          {products.map((product) => (
+          {discountedProducts.slice(0, 4).map((product) => (
             <SaleProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -106,19 +108,26 @@ export function SaleOffBestPrices() {
   );
 }
 
-// Sale Product Card Component for reusability
-function SaleProductCard({ product }: { product: any }) {
+// Sale Product Card Component
+function SaleProductCard({ product }: { product: Product }) {
+  // Calculate discount percentage
+  const discountPercentage = product.discount_price 
+    ? Math.round(((product.price - product.discount_price) / product.price) * 100)
+    : 0;
+  
   return (
-    <div className="group cursor-pointer">
+    <Link to={`/product/${product.id}`} className="group cursor-pointer">
       <div className="aspect-square overflow-hidden bg-white mb-4 relative">
         <img
           src={product.image}
           alt={product.name}
           className="w-full h-full object-cover transform group-hover:scale-105 duration-500"
         />
-        <div className="absolute top-2 left-2 bg-primary-accent px-2 py-1">
-          <span className="text-button-sm text-primary-dark">-{product.discount}%</span>
-        </div>
+        {discountPercentage > 0 && (
+          <div className="absolute top-2 left-2 bg-primary-accent px-2 py-1">
+            <span className="text-button-sm text-primary-dark">-{discountPercentage}%</span>
+          </div>
+        )}
       </div>
       <div className="text-left">
         <p className="text-button-lg text-secondary-medium mb-1">{product.brand}</p>
@@ -126,13 +135,13 @@ function SaleProductCard({ product }: { product: any }) {
           {product.name}
         </h3>
         <div className="flex items-center gap-2">
-          <p className="text-h4">£{product.price.toFixed(2)}</p>
-          <p className="text-secondary-medium line-through">£{product.originalPrice.toFixed(2)}</p>
+          <p className="text-h4">₹{product.discount_price?.toFixed(2)}</p>
+          <p className="text-secondary-medium line-through">₹{product.price.toFixed(2)}</p>
         </div>
         {product.gender && (
           <p className="text-button-sm text-secondary-medium mt-1">{product.gender}</p>
         )}
       </div>
-    </div>
+    </Link>
   );
 }

@@ -6,50 +6,57 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Product } from "@/services/product.service";
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
+import { useState } from "react";
 
-export function MustHaveBestSellers() {
-  const products = [
-    {
-      id: 1,
-      name: "OMBRÈ LEATHER EAU DE PARFUM 100ML",
-      brand: "TOM FORD",
-      price: 140.00,
-      image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?ixlib=rb-4.0.3",
-      gender: "FOR MEN",
-    },
-    {
-      id: 2,
-      name: "FLORA GORGEOUS GARDENIA EAU DE PARFUM 100ML",
-      brand: "GUCCI",
-      price: 105.00,
-      image: "https://images.unsplash.com/photo-1541643600914-78b084683601?ixlib=rb-4.0.3",
-      gender: "FOR WOMEN",
-    },
-    {
-      id: 3,
-      name: "CK ONE EAU DE TOILETTE 200ML",
-      brand: "CALVIN KLEIN",
-      price: 45.00,
-      image: "https://images.unsplash.com/photo-1592945403244-b3faa7b3a4e1?ixlib=rb-4.0.3",
-      gender: "UNISEX",
-    },
-    {
-      id: 4,
-      name: "SAUVAGE EAU DE PARFUM 100ML",
-      brand: "DIOR",
-      price: 100.00,
-      image: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?ixlib=rb-4.0.3",
-      gender: "FOR MEN",
-    },
-    {
-      id: 5,
-      name: "L'EAU D'ISSEY POUR HOMME INTENSE EAU DE TOILETTE",
-      brand: "ISSEY MIYAKE",
-      price: 65.00,
-      image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?ixlib=rb-4.0.3",
-      gender: "FOR MEN",
-    },
-  ];
+interface MustHaveBestSellersProps {
+  products: Product[];
+  isLoading: boolean;
+}
+
+export function MustHaveBestSellers({ products, isLoading }: MustHaveBestSellersProps) {
+  if (isLoading) {
+    return (
+      <section className="py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <Skeleton className="h-8 w-40 mb-2" />
+              <Skeleton className="h-10 w-60" />
+            </div>
+            <Skeleton className="h-10 w-24" />
+          </div>
+          
+          <div className="hidden md:block">
+            <div className="grid grid-cols-5 gap-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="space-y-3">
+                  <Skeleton className="aspect-square w-full" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="md:hidden grid grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="space-y-3">
+                <Skeleton className="aspect-square w-full" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-24" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 md:py-16">
@@ -59,9 +66,11 @@ export function MustHaveBestSellers() {
             <span className="text-button-lg text-secondary-medium mb-2 block">MUST HAVE</span>
             <h2 className="text-h2 md:text-display-2">BEST SELLERS</h2>
           </div>
-          <button className="text-button-lg hover:text-primary-accent duration-200">
-            VIEW ALL →
-          </button>
+          <Link to="/products?sort=best-seller">
+            <Button variant="link" className="text-button-lg hover:text-primary-accent duration-200">
+              VIEW ALL →
+            </Button>
+          </Link>
         </div>
         
         {/* Desktop Carousel (hidden on mobile) */}
@@ -87,7 +96,7 @@ export function MustHaveBestSellers() {
 
         {/* Mobile Grid (hidden on desktop) */}
         <div className="md:hidden grid grid-cols-2 gap-4">
-          {products.map((product) => (
+          {products.slice(0, 4).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -97,9 +106,9 @@ export function MustHaveBestSellers() {
 }
 
 // Product Card Component for reusability
-function ProductCard({ product }: { product: any }) {
+export function ProductCard({ product }: { product: Product }) {
   return (
-    <div className="group cursor-pointer">
+    <Link to={`/product/${product.id}`} className="group cursor-pointer">
       <div className="aspect-square overflow-hidden bg-secondary-light mb-4">
         <img
           src={product.image}
@@ -112,11 +121,20 @@ function ProductCard({ product }: { product: any }) {
         <h3 className="text-body-2 mb-2 line-clamp-2 group-hover:text-primary-accent duration-200">
           {product.name}
         </h3>
-        <p className="text-h4">£{product.price.toFixed(2)}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          {product.discount_price ? (
+            <>
+              <p className="text-h4">₹{product.discount_price.toFixed(2)}</p>
+              <p className="text-secondary-medium line-through">₹{product.price.toFixed(2)}</p>
+            </>
+          ) : (
+            <p className="text-h4">₹{product.price.toFixed(2)}</p>
+          )}
+        </div>
         {product.gender && (
           <p className="text-button-sm text-secondary-medium mt-1">{product.gender}</p>
         )}
       </div>
-    </div>
+    </Link>
   );
 }

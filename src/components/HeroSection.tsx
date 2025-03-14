@@ -1,4 +1,7 @@
 
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
+
 export function HeroSection() {
   return (
     <section className="relative min-h-[400px] md:min-h-[600px]">
@@ -22,12 +25,14 @@ export function HeroSection() {
               Inspired by the exhilarating crispness of alpine air
             </p>
             <div className="flex items-center space-x-4 md:space-x-6 mb-6 md:mb-8">
-              <span className="text-2xl md:text-3xl font-bold text-white">£240.00</span>
+              <span className="text-2xl md:text-3xl font-bold text-white">₹18,000.00</span>
               <span className="text-sm text-white/60">Classic · 100ml</span>
             </div>
-            <button className="w-full md:w-auto bg-primary-accent text-primary-dark px-6 md:px-8 py-3 md:py-4 font-medium hover:bg-white duration-200">
-              SHOP NOW
-            </button>
+            <Link to="/products?brand=CREED">
+              <Button variant="accent" size="xl" className="w-full md:w-auto">
+                SHOP NOW
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

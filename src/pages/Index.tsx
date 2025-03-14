@@ -5,20 +5,27 @@ import { BrandBar } from "@/components/BrandBar";
 import { MustHaveBestSellers } from "@/components/MustHaveBestSellers";
 import { SaleOffBestPrices } from "@/components/SaleOffBestPrices";
 import { SEO } from "@/components/SEO";
+import { useFeaturedProducts, useBestSellers, useDiscountedProducts } from "@/services/product.service";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Index = () => {
+  const { data: featuredProducts, isLoading: isFeaturedLoading } = useFeaturedProducts();
+  const { data: bestSellers, isLoading: isBestSellersLoading } = useBestSellers();
+  const { data: discountedProducts, isLoading: isDiscountedLoading } = useDiscountedProducts();
+
   return (
     <>
       <SEO 
-        title="Nigedum | Premium Perfumes & Fragrances"
-        description="Discover our collection of luxury perfumes and fragrances at Nigedum. Find your signature scent with our carefully curated selection."
+        title="Ahmadi Perfumes | Premium Indian Fragrances"
+        description="Discover our collection of luxury perfumes and fragrances at Ahmadi Perfumes. Find your signature scent with our carefully curated selection."
         ogType="website"
       />
       <HeroSection />
       <BrandBar />
-      <FeaturedProducts />
-      <MustHaveBestSellers />
-      <SaleOffBestPrices />
+      <FeaturedProducts products={featuredProducts || []} isLoading={isFeaturedLoading} />
+      <MustHaveBestSellers products={bestSellers || []} isLoading={isBestSellersLoading} />
+      <SaleOffBestPrices products={discountedProducts || []} isLoading={isDiscountedLoading} />
     </>
   );
 };

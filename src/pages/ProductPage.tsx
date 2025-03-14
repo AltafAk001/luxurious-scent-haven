@@ -1,32 +1,37 @@
 
-import { useParams } from "react-router-dom";
-import { SEO } from "@/components/SEO";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { SEO, createProductStructuredData } from "@/components/SEO";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductDetails } from "@/components/product/ProductDetails";
 import { ProductDescription } from "@/components/product/ProductDescription";
 import { ProductReviews } from "@/components/product/ProductReviews";
+import { useProduct, useRelatedProducts } from "@/services/product.service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const productId = id ? parseInt(id) : 0;
+  
+  const { data: product, isLoading, error } = useProduct(productId);
+  const { data: relatedProducts } = useRelatedProducts(productId, product?.category, product?.brand);
 
-  // Mock product data
-  const product = {
-    id: 1,
-    name: "BLEU DE CHANEL EAU DE PARFUM",
-    brand: "Chanel",
-    price: 124.00,
-    discountPrice: 99.00,
-    image: "/lovable-uploads/a5a6a3a5-e9a9-4a5a-b43b-98647ccd1fad.png",
-    description: "An elegant expression of simplicity, modern with an understated and refined character. BLEU DE CHANEL asserts itself as the scent of a man who refuses to be defined. The composition reveals the spirit of a man who chooses his own destiny with independence and determination.",
-    rating: 4.5,
-    reviews: 120,
-    inStock: true,
-    sizes: ["50 ML", "100 ML", "150 ML"],
-    bestSeller: true,
-    featuredProduct: true,
-    category: "perfume"
-  };
+  // Redirect to 404 if product doesn't exist or there's an error
+  useEffect(() => {
+    if (!isLoading && (!product || error)) {
+      navigate("/not-found", { replace: true });
+    }
+  }, [product, isLoading, error, navigate]);
+
+  if (isLoading) {
+    return <ProductSkeleton />;
+  }
+
+  if (!product) {
+    return null; // Will redirect to 404 via useEffect
+  }
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -34,14 +39,18 @@ const ProductPage = () => {
     { label: product.name, href: `/product/${id}` }
   ];
 
+  // Create structured data for SEO
+  const productStructuredData = createProductStructuredData(product);
+
   return (
     <div>
       <SEO 
-        title={`${product.name} | Nigedum`}
+        title={`${product.name} | Ahmadi Perfumes`}
         description={`${product.description?.substring(0, 160)}...`}
         ogImage={product.image}
         ogType="product"
         keywords={`${product.name}, perfume, fragrance, ${product.brand}, luxury perfume`}
+        structuredData={productStructuredData}
       />
       <div className="bg-white">
         {/* Breadcrumb */}
@@ -65,7 +74,59 @@ const ProductPage = () => {
           <ProductDescription product={product} />
 
           {/* Reviews Section */}
-          <ProductReviews />
+          <ProductReviews productId={product.id} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Skeleton loader for product page
+const ProductSkeleton = () => {
+  return (
+    <div className="bg-white">
+      <div className="border-b border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="py-4">
+            <Skeleton className="h-6 w-1/3" />
+          </div>
+        </div>
+      </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="lg:flex lg:space-x-8">
+          <div className="lg:w-1/2">
+            <Skeleton className="h-96 w-full rounded-md" />
+          </div>
+          <div className="lg:w-1/2 space-y-4 mt-4 lg:mt-0">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+            <Skeleton className="h-6 w-1/3" />
+            <div className="flex space-x-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-6 w-6 rounded-full" />
+              ))}
+            </div>
+            <div className="space-y-2 pt-4">
+              <Skeleton className="h-6 w-1/4" />
+              <div className="flex space-x-2">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-10 w-16 rounded-full" />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2 pt-4">
+              <Skeleton className="h-6 w-1/4" />
+              <div className="flex space-x-2">
+                <Skeleton className="h-10 w-10" />
+                <Skeleton className="h-10 w-20" />
+                <Skeleton className="h-10 w-10" />
+              </div>
+            </div>
+            <div className="pt-4 space-y-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
         </div>
       </div>
     </div>

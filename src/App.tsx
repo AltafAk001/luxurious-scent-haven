@@ -21,8 +21,8 @@ import "./App.css";
 function App() {
   return (
     <HelmetProvider>
-      <BrowserRouter>
-        <CartProvider>
+      <CartProvider>
+        <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
@@ -38,8 +38,8 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
-        </CartProvider>
-      </BrowserRouter>
+        </BrowserRouter>
+      </CartProvider>
     </HelmetProvider>
   );
 }

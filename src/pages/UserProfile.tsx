@@ -158,9 +158,9 @@ const UserProfile = () => {
       street: newAddress.street,
       city: newAddress.city,
       state: newAddress.state,
-      zip_code: newAddress.zipCode,
+      zip_code: newAddress.zip_code,
       country: newAddress.country,
-      is_default: newAddress.isDefault
+      is_default: newAddress.is_default
     }, {
       onSuccess: () => {
         setShowAddressForm(false);
@@ -189,9 +189,9 @@ const UserProfile = () => {
         street: updatedAddress.street,
         city: updatedAddress.city,
         state: updatedAddress.state,
-        zip_code: updatedAddress.zipCode,
+        zip_code: updatedAddress.zip_code,
         country: updatedAddress.country,
-        is_default: updatedAddress.isDefault
+        is_default: updatedAddress.is_default
       }
     }, {
       onSuccess: () => {
@@ -452,9 +452,9 @@ const UserProfile = () => {
       street: address.street,
       city: address.city,
       state: address.state,
-      zipCode: address.zip_code,
+      zip_code: address.zip_code,
       country: address.country,
-      isDefault: address.is_default
+      is_default: address.is_default
     };
   };
 

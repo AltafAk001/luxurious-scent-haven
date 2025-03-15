@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { AhmadiLogo } from "@/components/AhmadiLogo";
@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, ChevronsRight } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCreateOrder } from "@/services/order.service";
+import { useCart } from "@/contexts/CartContext";
 
 const CheckoutPayment = () => {
   const [paymentMethod, setPaymentMethod] = useState("visa");
@@ -15,9 +19,57 @@ const CheckoutPayment = () => {
   const [cvv, setCvv] = useState("");
   const [nameOnCard, setNameOnCard] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [savedPaymentMethods, setSavedPaymentMethods] = useState<any[]>([]);
+  const [savePaymentMethod, setSavePaymentMethod] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const createOrder = useCreateOrder();
+  const { cart, clearCart } = useCart();
+  
+  // Fetch user's addresses
+  useEffect(() => {
+    if (user) {
+      const fetchAddresses = async () => {
+        const { data, error } = await supabase
+          .from('user_addresses')
+          .select('*')
+          .order('is_default', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching addresses:', error);
+          return;
+        }
+        
+        setAddresses(data || []);
+        if (data && data.length > 0) {
+          // Select default address or first one
+          const defaultAddress = data.find(addr => addr.is_default);
+          setSelectedAddress(defaultAddress ? defaultAddress.id : data[0].id);
+        }
+      };
+      
+      const fetchPaymentMethods = async () => {
+        const { data, error } = await supabase
+          .from('user_payment_methods')
+          .select('*')
+          .order('is_default', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching payment methods:', error);
+          return;
+        }
+        
+        setSavedPaymentMethods(data || []);
+      };
+      
+      fetchAddresses();
+      fetchPaymentMethods();
+    }
+  }, [user]);
   
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -26,11 +78,64 @@ const CheckoutPayment = () => {
     { label: "Payment", href: "/checkout/payment" }
   ];
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const processPayment = async () => {
+    // In a real app, this would connect to a payment processor
+    // For now, we'll simulate a payment processing delay
+    return new Promise<{ success: boolean, paymentMethodId?: string }>((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true, paymentMethodId: "pm_simulated_payment" });
+      }, 1500);
+    });
+  };
+  
+  const savePaymentMethodToDatabase = async () => {
+    if (!user) return null;
+    
+    const { data, error } = await supabase
+      .from('user_payment_methods')
+      .insert({
+        user_id: user.id,
+        card_number: cardNumber.replace(/\s/g, ''),
+        cardholder_name: nameOnCard,
+        expiry_date: expiryDate,
+        card_type: paymentMethod,
+        is_default: savedPaymentMethods.length === 0 // Make default if first card
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error saving payment method:', error);
+      return null;
+    }
+    
+    return data.id;
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate input
-    if (!cardNumber || !expiryDate || !cvv || !nameOnCard) {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "Please sign in to complete your purchase",
+      });
+      navigate('/login');
+      return;
+    }
+    
+    if (!selectedAddress) {
+      toast({
+        variant: "destructive",
+        title: "Shipping address required",
+        description: "Please select a shipping address",
+      });
+      return;
+    }
+    
+    // Validate input if using credit card
+    if (paymentMethod === 'visa' && (!cardNumber || !expiryDate || !cvv || !nameOnCard)) {
       toast({
         variant: "destructive",
         title: "Missing information",
@@ -41,27 +146,73 @@ const CheckoutPayment = () => {
     
     setIsProcessing(true);
     
-    // Simulate processing
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      // Process payment
+      const paymentResult = await processPayment();
       
-      // Store payment info in sessionStorage
+      if (!paymentResult.success) {
+        toast({
+          variant: "destructive",
+          title: "Payment failed",
+          description: "Unable to process your payment. Please try again.",
+        });
+        setIsProcessing(false);
+        return;
+      }
+      
+      // Save payment method if requested
+      let paymentMethodId = paymentResult.paymentMethodId;
+      if (savePaymentMethod && paymentMethod === 'visa') {
+        const savedMethodId = await savePaymentMethodToDatabase();
+        if (savedMethodId) {
+          paymentMethodId = savedMethodId;
+        }
+      }
+      
+      // Prepare order data
+      const orderData = {
+        total_amount: cart.total,
+        shipping_address_id: selectedAddress,
+        payment_method_id: paymentMethodId || 'none',
+        items: cart.items.map(item => ({
+          product_id: item.id.toString(),
+          product_name: item.name,
+          product_image: item.image,
+          quantity: item.quantity,
+          unit_price: item.price,
+          total_price: item.price * item.quantity
+        }))
+      };
+      
+      // Create order in database
+      const orderId = await createOrder.mutateAsync(orderData);
+      
+      // Store payment info in sessionStorage for order confirmation
       const paymentInfo = {
         paymentMethod,
-        cardNumber,
+        cardNumber: cardNumber || "Mobile payment",
         expiryDate,
         nameOnCard
       };
       sessionStorage.setItem("paymentInfo", JSON.stringify(paymentInfo));
+      sessionStorage.setItem("orderId", orderId);
       
-      // Redirect back to checkout
-      navigate("/checkout");
+      // Clear the cart
+      await clearCart();
       
+      // Redirect to order confirmation
+      navigate("/order-confirmation");
+      
+    } catch (error) {
+      console.error('Order creation error:', error);
       toast({
-        title: "Payment method saved",
-        description: "Your payment details have been saved"
+        variant: "destructive",
+        title: "Order failed",
+        description: "There was an error processing your order. Please try again.",
       });
-    }, 1500);
+    } finally {
+      setIsProcessing(false);
+    }
   };
   
   const formatCardNumber = (value: string) => {
@@ -96,6 +247,14 @@ const CheckoutPayment = () => {
     setExpiryDate(value);
   };
   
+  const handleSelectSavedPaymentMethod = (method: any) => {
+    setPaymentMethod(method.card_type);
+    setCardNumber(method.card_number);
+    setNameOnCard(method.cardholder_name);
+    setExpiryDate(method.expiry_date);
+    setCvv(''); // CVV is never stored
+  };
+  
   return (
     <div className="bg-white min-h-screen">
       {/* Header with logo */}
@@ -123,6 +282,95 @@ const CheckoutPayment = () => {
               Please select your preferred payment method
             </p>
           </div>
+          
+          {/* Address Selection */}
+          {addresses.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-medium mb-4">Shipping Address</h2>
+              <div className="space-y-3">
+                {addresses.map((address) => (
+                  <div 
+                    key={address.id}
+                    className={`border rounded-md p-4 cursor-pointer transition-all ${
+                      selectedAddress === address.id ? 'border-primary-dark bg-gray-50' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setSelectedAddress(address.id)}
+                  >
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="font-medium">{address.name}</p>
+                        <p className="text-sm text-gray-600">{address.street}</p>
+                        <p className="text-sm text-gray-600">{address.city}, {address.state} {address.zip_code}</p>
+                        <p className="text-sm text-gray-600">{address.country}</p>
+                      </div>
+                      <div>
+                        <input 
+                          type="radio" 
+                          checked={selectedAddress === address.id} 
+                          onChange={() => setSelectedAddress(address.id)}
+                          className="h-4 w-4 text-primary-dark"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Saved Payment Methods */}
+          {savedPaymentMethods.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-medium mb-4">Saved Payment Methods</h2>
+              <div className="space-y-3">
+                {savedPaymentMethods.map((method) => (
+                  <div 
+                    key={method.id}
+                    className={`border rounded-md p-4 cursor-pointer transition-all ${
+                      cardNumber === method.card_number ? 'border-primary-dark bg-gray-50' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => handleSelectSavedPaymentMethod(method)}
+                  >
+                    <div className="flex justify-between">
+                      <div className="flex items-center">
+                        <img 
+                          src="/lovable-uploads/c64788aa-c064-4eaa-9144-2152ad3b0577.png" 
+                          alt="Card" 
+                          className="h-8 mr-4" 
+                        />
+                        <div>
+                          <p className="font-medium">{method.cardholder_name}</p>
+                          <p className="text-sm text-gray-600">
+                            **** **** **** {method.card_number.slice(-4)}
+                          </p>
+                          <p className="text-sm text-gray-600">Expires: {method.expiry_date}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <input 
+                          type="radio" 
+                          checked={cardNumber === method.card_number} 
+                          onChange={() => handleSelectSavedPaymentMethod(method)}
+                          className="h-4 w-4 text-primary-dark"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button 
+                  className="text-primary-dark text-sm hover:underline mt-2"
+                  onClick={() => {
+                    setCardNumber('');
+                    setNameOnCard('');
+                    setExpiryDate('');
+                    setCvv('');
+                  }}
+                >
+                  + Use a new payment method
+                </button>
+              </div>
+            </div>
+          )}
           
           <div className="mb-8">
             <h2 className="text-lg font-medium mb-4">Payment Options</h2>
@@ -162,7 +410,7 @@ const CheckoutPayment = () => {
           </div>
 
           {/* Card Payment Form - only show for credit card option */}
-          {paymentMethod === 'visa' && (
+          {paymentMethod === 'visa' && cardNumber === '' && (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
@@ -229,6 +477,19 @@ const CheckoutPayment = () => {
                     required
                   />
                 </div>
+                
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="saveCard"
+                    checked={savePaymentMethod}
+                    onChange={(e) => setSavePaymentMethod(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <label htmlFor="saveCard" className="text-sm text-gray-700">
+                    Save this card for future purchases
+                  </label>
+                </div>
               </div>
               
               <div className="pt-4">
@@ -238,30 +499,32 @@ const CheckoutPayment = () => {
                   className="w-full"
                   disabled={isProcessing}
                 >
-                  {isProcessing ? "Processing..." : "Save Payment Information"}
+                  {isProcessing ? "Processing..." : "Pay Now"}
                   {!isProcessing && <ChevronsRight className="ml-2 h-4 w-4" />}
                 </Button>
               </div>
             </form>
           )}
           
-          {/* Mobile Wallet Options - for other payment methods */}
-          {paymentMethod !== 'visa' && (
+          {/* Mobile Wallet Options - for other payment methods or when a card is selected */}
+          {(paymentMethod !== 'visa' || cardNumber !== '') && (
             <div className="space-y-6">
-              <div>
-                <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                  Mobile Number
-                </label>
-                <Input
-                  id="mobileNumber"
-                  type="tel"
-                  placeholder="Enter your mobile number"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, ''))}
-                  maxLength={10}
-                  required
-                />
-              </div>
+              {paymentMethod !== 'visa' && (
+                <div>
+                  <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                    Mobile Number
+                  </label>
+                  <Input
+                    id="mobileNumber"
+                    type="tel"
+                    placeholder="Enter your mobile number"
+                    value={cardNumber}
+                    onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, ''))}
+                    maxLength={10}
+                    required
+                  />
+                </div>
+              )}
               
               <Button 
                 onClick={handleSubmit} 
@@ -269,7 +532,7 @@ const CheckoutPayment = () => {
                 className="w-full"
                 disabled={isProcessing}
               >
-                {isProcessing ? "Processing..." : `Continue with ${paymentMethod === 'gpay' ? 'Google Pay' : paymentMethod === 'paytm' ? 'Paytm' : 'PhonePe'}`}
+                {isProcessing ? "Processing..." : `Pay Now`}
                 {!isProcessing && <ChevronsRight className="ml-2 h-4 w-4" />}
               </Button>
             </div>

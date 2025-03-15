@@ -1,216 +1,154 @@
 
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AhmadiLogo } from "@/components/AhmadiLogo";
+import { OrderTracker } from "@/components/order/OrderTracker";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, FileText, Printer } from "lucide-react";
-
-// Mock order data
-const order = {
-  id: "#53CA2FMCR28",
-  date: "02-01-2023 12:10",
-  paymentMethod: "Visa card ending in 1767",
-  items: [
-    {
-      id: 1,
-      name: "BLEU DE CHANEL EAU DE PARFUM",
-      size: "100 ML",
-      price: 124.00,
-      image: "/lovable-uploads/a5a6a3a5-e9a9-4a5a-b43b-98647ccd1fad.png",
-    },
-    {
-      id: 2,
-      name: "N°5 CHANEL PARIS EAU DE PARFUM",
-      size: "100 ML",
-      price: 124.00,
-      image: "/lovable-uploads/a5a6a3a5-e9a9-4a5a-b43b-98647ccd1fad.png",
-    }
-  ],
-  user: {
-    name: "Christopher Brooks",
-    email: "Christobrooks@gmail.com",
-    address: {
-      street: "15 Oxford Street, Bloomsbury",
-      city: "London",
-      postcode: "W1T 1QF",
-      country: "United Kingdom"
-    }
-  },
-  productTotal: 248.00,
-  shippingCost: 0,
-  vat: 24.80,
-  discount: 20.00,
-  orderTotal: 230.00,
-  note: "I need it urgently to give to my friend for her birthday in the next 2 days. Hope the shop will help me deliver it as soon as possible. Thanks a lot."
-};
+import { CheckCircle, ShoppingBag, Truck } from "lucide-react";
+import { useOrder } from "@/services/order.service";
 
 const OrderConfirmation = () => {
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const { data: order } = useOrder(orderId || undefined);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Get order ID from session storage
+    const storedOrderId = sessionStorage.getItem("orderId");
+    if (!storedOrderId) {
+      // Redirect to home if no order ID found
+      navigate("/");
+      return;
+    }
+    
+    setOrderId(storedOrderId);
+    
+    // Clean up session storage
+    return () => {
+      sessionStorage.removeItem("orderId");
+      sessionStorage.removeItem("paymentInfo");
+    };
+  }, [navigate]);
+  
+  if (!orderId) {
+    return null; // Will redirect in the useEffect
+  }
+  
   return (
     <div className="bg-white min-h-screen">
-      {/* Success Message */}
-      <div className="bg-white py-12 text-center">
-        <div className="mb-6">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-        </div>
-        <h1 className="text-2xl font-medium">
-          Thank you ! <span className="bg-yellow-300 px-2">Order Success</span>
-        </h1>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="container mx-auto px-4">
-        <div className="flex flex-wrap gap-3 mb-8">
-          <Button variant="dark" className="uppercase">
-            View Order Details
-          </Button>
-          <Button variant="light" className="uppercase">
-            Continue Shopping
-          </Button>
-          <div className="ml-auto flex gap-3">
-            <Button variant="light" className="flex items-center gap-2">
-              <FileText size={16} />
-              Download Invoice
-            </Button>
-            <Button variant="light" className="flex items-center gap-2">
-              <Printer size={16} />
-              Print Invoice
-            </Button>
-          </div>
+      {/* Header with logo */}
+      <div className="bg-gray-50 py-4 border-b border-gray-200">
+        <div className="container mx-auto px-4 flex justify-center">
+          <AhmadiLogo size="medium" />
         </div>
       </div>
-
-      <div className="container mx-auto px-4 pb-16">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="lg:w-3/5">
-            {/* Order Information */}
-            <div className="mb-8">
-              <h2 className="text-xl font-medium mb-2">ORDER INFORMATION</h2>
-              <p className="text-gray-600 mb-6">Order details has been sent to your registered email account, double check your order details</p>
-
-              {/* Order Items */}
-              <div className="bg-gray-50 p-6 rounded-md">
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex items-center border-b border-gray-200 py-6 last:border-b-0">
-                    <div className="w-24 h-24 bg-white p-2 flex-shrink-0">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+      
+      <div className="container mx-auto max-w-4xl px-4 py-12">
+        <div className="text-center mb-10">
+          <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="h-10 w-10 text-green-600" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2">Thank You for Your Order!</h1>
+          <p className="text-gray-600">
+            Your order #{orderId.slice(0, 8)} has been confirmed and is being processed.
+          </p>
+          <p className="text-gray-600 mt-1">
+            We've sent a confirmation email to {order?.user_id ? "your email address" : "the provided email address"}.
+          </p>
+        </div>
+        
+        {/* Order Tracker */}
+        <div className="mb-10">
+          <OrderTracker 
+            status={order?.order_status || "pending"} 
+            trackingNumber={order?.tracking_number}
+            estimatedDelivery={order?.estimated_delivery_date}
+          />
+        </div>
+        
+        {/* Order Items Preview */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-10">
+          <h2 className="text-xl font-medium mb-4">Order Summary</h2>
+          
+          <div className="divide-y divide-gray-200">
+            {order?.items?.map((item) => (
+              <div key={item.id} className="py-4 flex">
+                <div className="flex-shrink-0 h-24 w-24 bg-gray-100 rounded-md overflow-hidden">
+                  {item.product_image ? (
+                    <img 
+                      src={item.product_image} 
+                      alt={item.product_name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <ShoppingBag className="h-10 w-10 text-gray-400" />
                     </div>
-                    <div className="ml-4 flex-grow">
-                      <h3 className="font-medium text-sm md:text-base">{item.name}</h3>
-                      <p className="text-gray-500 text-sm">{item.size}</p>
-                    </div>
-                    <div className="ml-4 font-medium">
-                      £{item.price.toFixed(2)}
-                    </div>
+                  )}
+                </div>
+                <div className="ml-4 flex-1">
+                  <h3 className="font-medium">{item.product_name}</h3>
+                  <p className="text-sm text-gray-600 mt-1">Quantity: {item.quantity}</p>
+                  <div className="mt-1 flex justify-between">
+                    <p className="text-sm text-gray-600">Unit price: ₹{item.unit_price.toFixed(2)}</p>
+                    <p className="font-medium">₹{item.total_price.toFixed(2)}</p>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-
-            {/* Post-Purchase Support */}
-            <div>
-              <h2 className="text-xl font-medium mb-4">Do you have any problems after placing your order successfully?</h2>
-              <p className="text-gray-600 mb-4">Let us know your questions.</p>
-              <Link to="/contact" className="flex items-center text-gray-800 hover:text-primary-dark">
-                Contact us
-                <ArrowRight className="ml-2" size={16} />
-              </Link>
+            ))}
+          </div>
+          
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <div className="flex justify-between font-medium">
+              <span>Total</span>
+              <span>₹{order?.total_amount.toFixed(2) || '0.00'}</span>
             </div>
           </div>
-
-          <div className="lg:w-2/5">
-            <div className="space-y-8">
-              {/* Invoice */}
-              <div className="border-b border-gray-200 pb-8">
-                <h2 className="text-xl font-medium mb-6">INVOICE</h2>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Order ID</span>
-                    <span className="font-medium">{order.id}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Time Order</span>
-                    <span>{order.date}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Payment Method</span>
-                    <span>{order.paymentMethod}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Payment Time</span>
-                    <span>{order.date}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Product Total (2)</span>
-                    <span>£{order.productTotal.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping To</span>
-                    <span>United Kingdom</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping Costs</span>
-                    <span>£{order.shippingCost.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total without VAT</span>
-                    <span>£{(order.productTotal - order.vat).toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Including 10% VAT</span>
-                    <span>£{order.vat.toFixed(2)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Discount Code</span>
-                    <span>-£{order.discount.toFixed(2)}</span>
-                  </div>
-                </div>
-                
-                <div className="mt-4 pt-3 border-t border-gray-200">
-                  <div className="flex justify-between font-medium text-lg">
-                    <span>Order Total</span>
-                    <span>£{order.orderTotal.toFixed(2)}</span>
-                  </div>
-                </div>
+        </div>
+        
+        {/* What's Next? */}
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-10">
+          <h2 className="text-xl font-medium mb-4">What's Next?</h2>
+          
+          <div className="space-y-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <Truck className="h-6 w-6 text-primary-dark" />
               </div>
-              
-              {/* Note */}
-              <div className="border-b border-gray-200 pb-8">
-                <h3 className="font-medium mb-3">Note Order</h3>
-                <div className="p-3 bg-gray-50 rounded-md text-sm text-gray-600 border border-gray-200">
-                  <p>{order.note}</p>
-                </div>
+              <div className="ml-3">
+                <h3 className="font-medium">Shipping Updates</h3>
+                <p className="text-sm text-gray-600">
+                  We'll send you shipping updates via email. You can also track your order by visiting your account or using the link in the confirmation email.
+                </p>
               </div>
-              
-              {/* Account Info */}
-              <div>
-                <h3 className="font-medium mb-4">Account</h3>
-                <div className="space-y-1">
-                  <p className="font-medium">{order.user.name}</p>
-                  <p className="text-gray-600">{order.user.email}</p>
-                </div>
-                
-                <h3 className="font-medium mt-6 mb-2">Shipping Address</h3>
-                <div className="space-y-1">
-                  <p>{order.user.name}</p>
-                  <p>{order.user.address.street}</p>
-                  <p>{order.user.address.city}, {order.user.address.postcode}</p>
-                  <p>{order.user.address.country}</p>
-                </div>
+            </div>
+            
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-6 w-6 text-primary-dark" />
+              </div>
+              <div className="ml-3">
+                <h3 className="font-medium">Order Tracking</h3>
+                <p className="text-sm text-gray-600">
+                  Track your package at any time by visiting the order tracking page. We'll keep you updated on its journey to you.
+                </p>
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link to={`/order/${orderId}`}>
+            <Button variant="dark">
+              Track Order
+            </Button>
+          </Link>
+          <Link to="/">
+            <Button variant="outline">
+              Continue Shopping
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

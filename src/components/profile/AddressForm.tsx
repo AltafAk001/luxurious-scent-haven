@@ -11,9 +11,9 @@ interface Address {
   street: string;
   city: string;
   state: string;
-  zipCode: string;
+  zip_code: string;
   country: string;
-  isDefault: boolean;
+  is_default: boolean;
 }
 
 interface AddressFormProps {
@@ -27,9 +27,9 @@ export const AddressForm = ({ onSave, editAddress, onCancel }: AddressFormProps)
   const [street, setStreet] = useState(editAddress?.street || '');
   const [city, setCity] = useState(editAddress?.city || '');
   const [state, setState] = useState(editAddress?.state || '');
-  const [zipCode, setZipCode] = useState(editAddress?.zipCode || '');
+  const [zipCode, setZipCode] = useState(editAddress?.zip_code || '');
   const [country, setCountry] = useState(editAddress?.country || '');
-  const [isDefault, setIsDefault] = useState(editAddress?.isDefault || false);
+  const [isDefault, setIsDefault] = useState(editAddress?.is_default || false);
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -49,9 +49,9 @@ export const AddressForm = ({ onSave, editAddress, onCancel }: AddressFormProps)
       street,
       city,
       state,
-      zipCode,
+      zip_code: zipCode,
       country,
-      isDefault
+      is_default: isDefault
     });
   };
 

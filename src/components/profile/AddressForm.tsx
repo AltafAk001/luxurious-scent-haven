@@ -49,9 +49,9 @@ export const AddressForm = ({ onSave, editAddress, onCancel }: AddressFormProps)
       street,
       city,
       state,
-      zip_code: zipCode,
+      zip_code: zipCode, // Map to correct property name for the API
       country,
-      is_default: isDefault
+      is_default: isDefault // Map to correct property name for the API
     });
   };
 

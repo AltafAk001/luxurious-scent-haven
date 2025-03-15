@@ -44,7 +44,7 @@ export const ProductDescription = ({ product }: ProductDescriptionProps) => {
           <AccordionTrigger className="uppercase font-semibold">Shipping & Returns</AccordionTrigger>
           <AccordionContent>
             <p>
-              We offer free shipping on all orders over £50. Returns are accepted within 30 days of purchase.
+              We offer free shipping on all orders over ₹999. Returns are accepted within 30 days of purchase.
             </p>
           </AccordionContent>
         </AccordionItem>

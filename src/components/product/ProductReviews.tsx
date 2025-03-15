@@ -1,86 +1,85 @@
 
 import React from 'react';
-import { Star } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Star } from "lucide-react";
 
-export const ProductReviews = () => {
+interface ProductReviewsProps {
+  id: number;
+}
+
+export const ProductReviews = ({ id }: ProductReviewsProps) => {
+  // Mock reviews data (would be fetched from API in real app)
+  const reviews = [
+    {
+      id: 1,
+      author: "Sarah J.",
+      rating: 5,
+      date: "March 15, 2023",
+      content: "Absolutely love this fragrance! Long lasting and the scent is perfect for everyday wear.",
+    },
+    {
+      id: 2,
+      author: "Michael T.",
+      rating: 4,
+      date: "February 28, 2023",
+      content: "Great scent, but doesn't last quite as long as I'd like. Still, very pleased with my purchase.",
+    },
+    {
+      id: 3,
+      author: "Priya K.",
+      rating: 5,
+      date: "January 12, 2023",
+      content: "Received so many compliments when wearing this perfume. Absolutely worth the price!",
+    },
+  ];
+
   return (
-    <div className="py-8">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Reviews</h2>
-      {/* Review Form */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline">Add a Review</Button>
-        </SheetTrigger>
-        <SheetContent className="sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>Write a Review</SheetTitle>
-            <SheetDescription>
-              Share your thoughts about this product with other customers.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input id="name" value="Kristin Thomas" className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Email
-              </Label>
-              <Input id="email" value="kristin.thomas@example.com" className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="review" className="text-right mt-2">
-                Review
-              </Label>
-              <Textarea id="review" className="col-span-3" />
-            </div>
+    <div className="py-8 border-t border-gray-200">
+      <h2 className="text-2xl font-semibold mb-4">Customer Reviews</h2>
+      
+      <div className="mb-8">
+        <div className="flex items-center mb-2">
+          <div className="flex mr-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className="h-5 w-5 text-yellow-500 fill-yellow-500"
+              />
+            ))}
           </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Mock Reviews */}
-      <div className="mt-6">
-        <div className="mb-4">
-          <div className="flex items-center">
-            <div className="flex items-center">
-              {Array.from({ length: 5 }, (_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${i < 4 ? 'text-yellow-500' : 'text-gray-300'}`}
-                />
-              ))}
-            </div>
-            <span className="text-gray-500 ml-2">By John Doe on January 1, 2023</span>
-          </div>
-          <p className="text-gray-700">
-            "This is a great product! I love the smell and it lasts all day."
-          </p>
+          <span className="text-gray-600">Based on {reviews.length} reviews</span>
         </div>
-
-        <div className="mb-4">
-          <div className="flex items-center">
-            <div className="flex items-center">
-              {Array.from({ length: 5 }, (_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${i < 5 ? 'text-yellow-500' : 'text-gray-300'}`}
-                />
-              ))}
+      </div>
+      
+      <div className="space-y-6">
+        {reviews.map((review) => (
+          <div key={review.id} className="border-b border-gray-200 pb-6">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <span className="font-medium">{review.author}</span>
+                <span className="text-gray-500 ml-2">- {review.date}</span>
+              </div>
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`h-4 w-4 ${
+                      star <= review.rating
+                        ? "text-yellow-500 fill-yellow-500"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
-            <span className="text-gray-500 ml-2">By Jane Smith on February 15, 2023</span>
+            <p className="text-gray-700">{review.content}</p>
           </div>
-          <p className="text-gray-700">
-            "Excellent product! Fast shipping and great customer service."
-          </p>
-        </div>
+        ))}
       </div>
     </div>
   );

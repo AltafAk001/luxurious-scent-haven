@@ -71,10 +71,16 @@ const ProductPage = () => {
           </div>
 
           {/* Product Description & Details */}
-          <ProductDescription product={product} />
+          <ProductDescription product={{
+            description: product.description,
+            category: product.category,
+            brand: product.brand,
+            inStock: product.in_stock !== undefined ? product.in_stock : true,
+            sizes: product.sizes
+          }} />
 
           {/* Reviews Section */}
-          <ProductReviews productId={product.id} />
+          <ProductReviews id={product.id} />
         </div>
       </div>
     </div>

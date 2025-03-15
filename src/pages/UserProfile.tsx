@@ -15,6 +15,22 @@ import { AccountDetailsForm } from "@/components/profile/AccountDetailsForm";
 import { NotificationSettings } from "@/components/profile/NotificationSettings";
 import { VoucherList } from "@/components/profile/VoucherList";
 import { Switch } from "@/components/ui/switch";
+import { 
+  useUserAddresses, 
+  useUserPaymentMethods, 
+  useUserNotificationPreferences,
+  useAddUserAddress,
+  useUpdateUserAddress,
+  useDeleteUserAddress,
+  useAddUserPaymentMethod,
+  useUpdateUserPaymentMethod,
+  useDeleteUserPaymentMethod,
+  useUpdateUserNotificationPreferences,
+  useUpdateUserProfile,
+  UserAddress,
+  UserPaymentMethod,
+  UserNotificationPreferences
+} from "@/services/user.service";
 
 // Types
 interface PurchaseItem {
@@ -31,35 +47,7 @@ interface PurchaseItem {
   hasBeenTransferredToShipping?: boolean;
 }
 
-interface Address {
-  id: string;
-  name: string;
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-  isDefault: boolean;
-}
-
-interface PaymentMethod {
-  id: string;
-  cardNumber: string;
-  cardholderName: string;
-  expiryDate: string;
-  isDefault: boolean;
-}
-
-interface Voucher {
-  id: string;
-  code: string;
-  discount: string;
-  expiryDate: string;
-  description: string;
-  isActive: boolean;
-}
-
-// Mock data
+// Mock data for purchases - we'll replace addresses, payment methods, and notification preferences
 const mockPurchases: PurchaseItem[] = [
   {
     id: "1",
@@ -107,78 +95,12 @@ const mockPurchases: PurchaseItem[] = [
   }
 ];
 
-const mockAddresses: Address[] = [
-  {
-    id: "1",
-    name: "Home Address",
-    street: "123 Main Street",
-    city: "London",
-    state: "Greater London",
-    zipCode: "W1 1AA",
-    country: "United Kingdom",
-    isDefault: true
-  },
-  {
-    id: "2",
-    name: "Work Address",
-    street: "456 Business Ave",
-    city: "London",
-    state: "Greater London",
-    zipCode: "EC1 2BR",
-    country: "United Kingdom",
-    isDefault: false
-  }
-];
-
-const mockPaymentMethods: PaymentMethod[] = [
-  {
-    id: "1",
-    cardNumber: "4111 2222 3333 4444",
-    cardholderName: "John Doe",
-    expiryDate: "12/25",
-    isDefault: true
-  },
-  {
-    id: "2",
-    cardNumber: "5555 6666 7777 8888",
-    cardholderName: "John Doe",
-    expiryDate: "09/26",
-    isDefault: false
-  }
-];
-
-const mockVouchers: Voucher[] = [
-  {
-    id: "1",
-    code: "SUMMER25",
-    discount: "25%",
-    expiryDate: "31 Aug 2023",
-    description: "25% off on summer collection",
-    isActive: false
-  },
-  {
-    id: "2",
-    code: "WELCOME10",
-    discount: "£10",
-    expiryDate: "31 Dec 2023",
-    description: "£10 off on your first purchase",
-    isActive: true
-  },
-  {
-    id: "3",
-    code: "FREESHIP",
-    discount: "Free Shipping",
-    expiryDate: "15 Oct 2023",
-    description: "Free shipping on orders over £50",
-    isActive: true
-  }
-];
-
 const UserProfile = () => {
   const { user, loading, signOut } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
@@ -187,9 +109,6 @@ const UserProfile = () => {
 
   // State for account settings sections
   const [activeSection, setActiveSection] = useState<string>("purchases");
-  const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(mockPaymentMethods);
-  const [vouchers, setVouchers] = useState<Voucher[]>(mockVouchers);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showAccountForm, setShowAccountForm] = useState(false);
@@ -197,15 +116,20 @@ const UserProfile = () => {
   const [editPaymentId, setEditPaymentId] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Notification settings
-  const [notificationSettings, setNotificationSettings] = useState({
-    orderUpdates: true,
-    promotions: true,
-    newArrivals: false,
-    accountActivity: true,
-    emailNotifications: true,
-    smsNotifications: false,
-  });
+  // Fetch user data from Supabase using React Query hooks
+  const { data: addresses = [], isLoading: addressesLoading } = useUserAddresses(user?.id || "");
+  const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = useUserPaymentMethods(user?.id || "");
+  const { data: notificationPrefs, isLoading: notificationPrefsLoading } = useUserNotificationPreferences(user?.id || "");
+
+  // Mutation hooks for updating user data
+  const addAddressMutation = useAddUserAddress();
+  const updateAddressMutation = useUpdateUserAddress();
+  const deleteAddressMutation = useDeleteUserAddress();
+  const addPaymentMethodMutation = useAddUserPaymentMethod();
+  const updatePaymentMethodMutation = useUpdateUserPaymentMethod();
+  const deletePaymentMethodMutation = useDeleteUserPaymentMethod();
+  const updateNotificationsMutation = useUpdateUserNotificationPreferences();
+  const updateProfileMutation = useUpdateUserProfile();
 
   useEffect(() => {
     if (user) {
@@ -214,6 +138,7 @@ const UserProfile = () => {
       setFirstName(metadata.first_name || "");
       setLastName(metadata.last_name || "");
       setEmail(user.email || "");
+      setPhone(metadata.phone || "");
     }
   }, [user]);
 
@@ -226,139 +151,245 @@ const UserProfile = () => {
   }
 
   // Address handlers
-  const handleAddAddress = (newAddress: Omit<Address, 'id'>) => {
-    const id = `address_${Date.now()}`;
-    
-    // If new address is default, update other addresses
-    let updatedAddresses = [...addresses];
-    if (newAddress.isDefault) {
-      updatedAddresses = updatedAddresses.map(addr => ({
-        ...addr,
-        isDefault: false
-      }));
-    }
-    
-    setAddresses([
-      ...updatedAddresses,
-      {
-        id,
-        ...newAddress
+  const handleAddAddress = (newAddress: Omit<UserAddress, 'id' | 'user_id'>) => {
+    addAddressMutation.mutate({
+      user_id: user.id,
+      name: newAddress.name,
+      street: newAddress.street,
+      city: newAddress.city,
+      state: newAddress.state,
+      zip_code: newAddress.zipCode,
+      country: newAddress.country,
+      is_default: newAddress.isDefault
+    }, {
+      onSuccess: () => {
+        setShowAddressForm(false);
+        toast({
+          title: "Address Added",
+          description: "Your new address has been added successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to add address. Please try again.",
+        });
+        console.error("Error adding address:", error);
       }
-    ]);
-    
-    setShowAddressForm(false);
-    toast({
-      title: "Address Added",
-      description: "Your new address has been added successfully.",
     });
   };
 
-  const handleUpdateAddress = (id: string, updatedAddress: Omit<Address, 'id'>) => {
-    // If updated address is default, update other addresses
-    let newAddresses = [...addresses];
-    if (updatedAddress.isDefault) {
-      newAddresses = newAddresses.map(addr => ({
-        ...addr,
-        isDefault: addr.id === id ? true : false
-      }));
-    }
-    
-    setAddresses(
-      newAddresses.map(address => 
-        address.id === id ? { ...address, ...updatedAddress } : address
-      )
-    );
-    
-    setEditAddressId(null);
-    toast({
-      title: "Address Updated",
-      description: "Your address has been updated successfully.",
+  const handleUpdateAddress = (id: string, updatedAddress: Omit<UserAddress, 'id' | 'user_id'>) => {
+    updateAddressMutation.mutate({
+      id,
+      address: {
+        user_id: user.id,
+        name: updatedAddress.name,
+        street: updatedAddress.street,
+        city: updatedAddress.city,
+        state: updatedAddress.state,
+        zip_code: updatedAddress.zipCode,
+        country: updatedAddress.country,
+        is_default: updatedAddress.isDefault
+      }
+    }, {
+      onSuccess: () => {
+        setEditAddressId(null);
+        toast({
+          title: "Address Updated",
+          description: "Your address has been updated successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to update address. Please try again.",
+        });
+        console.error("Error updating address:", error);
+      }
     });
   };
 
   const handleDeleteAddress = (id: string) => {
-    setAddresses(addresses.filter(address => address.id !== id));
-    toast({
-      title: "Address Removed",
-      description: "Your address has been removed successfully.",
+    deleteAddressMutation.mutate({
+      id,
+      userId: user.id
+    }, {
+      onSuccess: () => {
+        toast({
+          title: "Address Removed",
+          description: "Your address has been removed successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to remove address. Please try again.",
+        });
+        console.error("Error deleting address:", error);
+      }
     });
   };
 
   // Payment method handlers
-  const handleAddPaymentMethod = (newPayment: Omit<PaymentMethod, 'id'>) => {
-    const id = `payment_${Date.now()}`;
-    
-    // If new payment is default, update other payments
-    let updatedPayments = [...paymentMethods];
-    if (newPayment.isDefault) {
-      updatedPayments = updatedPayments.map(payment => ({
-        ...payment,
-        isDefault: false
-      }));
-    }
-    
-    setPaymentMethods([
-      ...updatedPayments,
-      {
-        id,
-        ...newPayment
+  const handleAddPaymentMethod = (newPayment: Omit<PaymentMethodForm, 'id'>) => {
+    addPaymentMethodMutation.mutate({
+      user_id: user.id,
+      card_number: newPayment.cardNumber.replace(/\s/g, ''),
+      cardholder_name: newPayment.cardholderName,
+      expiry_date: newPayment.expiryDate,
+      is_default: newPayment.isDefault,
+      card_type: determineCardType(newPayment.cardNumber)
+    }, {
+      onSuccess: () => {
+        setShowPaymentForm(false);
+        toast({
+          title: "Payment Method Added",
+          description: "Your new payment method has been added successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to add payment method. Please try again.",
+        });
+        console.error("Error adding payment method:", error);
       }
-    ]);
-    
-    setShowPaymentForm(false);
-    toast({
-      title: "Payment Method Added",
-      description: "Your new payment method has been added successfully.",
     });
   };
 
-  const handleUpdatePaymentMethod = (id: string, updatedPayment: Omit<PaymentMethod, 'id'>) => {
-    // If updated payment is default, update other payments
-    let newPayments = [...paymentMethods];
-    if (updatedPayment.isDefault) {
-      newPayments = newPayments.map(payment => ({
-        ...payment,
-        isDefault: payment.id === id ? true : false
-      }));
-    }
-    
-    setPaymentMethods(
-      newPayments.map(payment => 
-        payment.id === id ? { ...payment, ...updatedPayment } : payment
-      )
-    );
-    
-    setEditPaymentId(null);
-    toast({
-      title: "Payment Method Updated",
-      description: "Your payment method has been updated successfully.",
+  const handleUpdatePaymentMethod = (id: string, updatedPayment: Omit<PaymentMethodForm, 'id'>) => {
+    updatePaymentMethodMutation.mutate({
+      id,
+      paymentMethod: {
+        user_id: user.id,
+        card_number: updatedPayment.cardNumber.replace(/\s/g, ''),
+        cardholder_name: updatedPayment.cardholderName,
+        expiry_date: updatedPayment.expiryDate,
+        is_default: updatedPayment.isDefault,
+        card_type: determineCardType(updatedPayment.cardNumber)
+      }
+    }, {
+      onSuccess: () => {
+        setEditPaymentId(null);
+        toast({
+          title: "Payment Method Updated",
+          description: "Your payment method has been updated successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to update payment method. Please try again.",
+        });
+        console.error("Error updating payment method:", error);
+      }
     });
   };
 
   const handleDeletePaymentMethod = (id: string) => {
-    setPaymentMethods(paymentMethods.filter(payment => payment.id !== id));
-    toast({
-      title: "Payment Method Removed",
-      description: "Your payment method has been removed successfully.",
+    deletePaymentMethodMutation.mutate({
+      id,
+      userId: user.id
+    }, {
+      onSuccess: () => {
+        toast({
+          title: "Payment Method Removed",
+          description: "Your payment method has been removed successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to remove payment method. Please try again.",
+        });
+        console.error("Error deleting payment method:", error);
+      }
     });
+  };
+
+  // Helper function to determine card type based on first digit
+  const determineCardType = (cardNumber: string): string => {
+    const firstDigit = cardNumber.replace(/\s/g, '').charAt(0);
+    switch (firstDigit) {
+      case '4':
+        return 'Visa';
+      case '5':
+        return 'MasterCard';
+      case '3':
+        return 'American Express';
+      case '6':
+        return 'Discover';
+      default:
+        return 'Other';
+    }
   };
 
   // Account details handler
   const handleUpdateAccountDetails = (details: { firstName: string; lastName: string; email: string; phone?: string }) => {
-    setFirstName(details.firstName);
-    setLastName(details.lastName);
-    setEmail(details.email);
-    
-    setShowAccountForm(false);
-    toast({
-      title: "Account Updated",
-      description: "Your account details have been updated successfully.",
+    updateProfileMutation.mutate({
+      userId: user.id,
+      profile: {
+        first_name: details.firstName,
+        last_name: details.lastName,
+        phone: details.phone || ''
+      }
+    }, {
+      onSuccess: () => {
+        setFirstName(details.firstName);
+        setLastName(details.lastName);
+        setPhone(details.phone || '');
+        setShowAccountForm(false);
+        toast({
+          title: "Account Updated",
+          description: "Your account details have been updated successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to update account details. Please try again.",
+        });
+        console.error("Error updating profile:", error);
+      }
     });
   };
 
   // Notification settings handler
-  const handleUpdateNotificationSettings = (settings: any) => {
-    setNotificationSettings(settings);
+  const handleUpdateNotificationSettings = (settings: UserNotificationPreferences) => {
+    updateNotificationsMutation.mutate({
+      userId: user.id,
+      preferences: {
+        order_updates: settings.order_updates,
+        promotions: settings.promotions,
+        new_arrivals: settings.new_arrivals,
+        account_activity: settings.account_activity,
+        email_notifications: settings.email_notifications,
+        sms_notifications: settings.sms_notifications
+      }
+    }, {
+      onSuccess: () => {
+        toast({
+          title: "Notification Settings Updated",
+          description: "Your notification preferences have been updated successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to update notification settings. Please try again.",
+        });
+        console.error("Error updating notification settings:", error);
+      }
+    });
   };
 
   const handleClearCart = async () => {
@@ -413,6 +444,31 @@ const UserProfile = () => {
     return purchases.filter(p => p.status.toLowerCase().replace(" ", "") === status).length;
   };
 
+  // Prepare address data for the AddressForm component
+  const formatAddressForForm = (address: UserAddress): any => {
+    return {
+      id: address.id,
+      name: address.name,
+      street: address.street,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zip_code,
+      country: address.country,
+      isDefault: address.is_default
+    };
+  };
+
+  // Prepare payment method data for the PaymentMethodForm component
+  const formatPaymentMethodForForm = (method: UserPaymentMethod): any => {
+    return {
+      id: method.id,
+      cardNumber: method.card_number,
+      cardholderName: method.cardholder_name,
+      expiryDate: method.expiry_date,
+      isDefault: method.is_default
+    };
+  };
+
   return (
     <div className="bg-white min-h-screen">
       <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
@@ -434,7 +490,7 @@ const UserProfile = () => {
                   <div>
                     <h2 className="font-semibold">{firstName} {lastName}</h2>
                     <button 
-                      className="text-xs text-gray-500 underline"
+                      className="text-xs text-[#FFC90B] hover:underline"
                       onClick={() => {
                         setActiveSection("account");
                         setShowAccountForm(true);
@@ -822,6 +878,12 @@ const UserProfile = () => {
                             <div className="text-sm text-gray-500">Email</div>
                             <div>{email}</div>
                           </div>
+                          {phone && (
+                            <div>
+                              <div className="text-sm text-gray-500">Phone</div>
+                              <div>{phone}</div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -854,14 +916,18 @@ const UserProfile = () => {
                   )}
                 </div>
                 
-                {showAddressForm ? (
+                {addressesLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                ) : showAddressForm ? (
                   <AddressForm 
                     onSave={handleAddAddress}
                     onCancel={() => setShowAddressForm(false)}
                   />
                 ) : editAddressId ? (
                   <AddressForm 
-                    editAddress={addresses.find(a => a.id === editAddressId)}
+                    editAddress={formatAddressForForm(addresses.find(a => a.id === editAddressId)!)}
                     onSave={(updatedAddress) => handleUpdateAddress(editAddressId, updatedAddress)}
                     onCancel={() => setEditAddressId(null)}
                   />
@@ -878,9 +944,9 @@ const UserProfile = () => {
                       addresses.map((address) => (
                         <div 
                           key={address.id} 
-                          className={`border rounded-lg p-4 relative ${address.isDefault ? 'border-primary bg-gray-50' : ''}`}
+                          className={`border rounded-lg p-4 relative ${address.is_default ? 'border-primary bg-gray-50' : ''}`}
                         >
-                          {address.isDefault && (
+                          {address.is_default && (
                             <div className="absolute top-2 right-2 bg-[#FFFAEB] text-[#FFC90B] text-xs px-2 py-0.5 rounded">
                               Default Address
                             </div>
@@ -892,7 +958,7 @@ const UserProfile = () => {
                             </div>
                             <div>
                               <div className="text-sm text-gray-500">Address</div>
-                              <div>{address.street}, {address.city}, {address.state} {address.zipCode}</div>
+                              <div>{address.street}, {address.city}, {address.state} {address.zip_code}</div>
                               <div>{address.country}</div>
                             </div>
                           </div>
@@ -904,12 +970,12 @@ const UserProfile = () => {
                             >
                               Edit
                             </Button>
-                            {!address.isDefault && (
+                            {!address.is_default && (
                               <>
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => handleUpdateAddress(address.id, {...address, isDefault: true})}
+                                  onClick={() => handleUpdateAddress(address.id, formatAddressForForm({...address, is_default: true}))}
                                 >
                                   Set as Default
                                 </Button>
@@ -931,6 +997,107 @@ const UserProfile = () => {
               </>
             )}
 
+            {/* Payment Methods Section */}
+            {activeSection === "payment" && (
+              <>
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-xl font-bold">Payment Methods</h1>
+                  {!showPaymentForm && !editPaymentId && (
+                    <Button variant="dark" onClick={() => setShowPaymentForm(true)}>
+                      Add New Payment Method
+                    </Button>
+                  )}
+                </div>
+                
+                {paymentMethodsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                ) : showPaymentForm ? (
+                  <PaymentMethodForm 
+                    onSave={handleAddPaymentMethod}
+                    onCancel={() => setShowPaymentForm(false)}
+                  />
+                ) : editPaymentId ? (
+                  <PaymentMethodForm 
+                    editPaymentMethod={formatPaymentMethodForForm(paymentMethods.find(p => p.id === editPaymentId)!)}
+                    onSave={(updatedPayment) => handleUpdatePaymentMethod(editPaymentId, updatedPayment)}
+                    onCancel={() => setEditPaymentId(null)}
+                  />
+                ) : (
+                  <div className="space-y-4">
+                    {paymentMethods.length === 0 ? (
+                      <div className="text-center py-10 border rounded-lg">
+                        <p className="text-gray-500 mb-4">You don't have any payment methods saved</p>
+                        <Button variant="dark" onClick={() => setShowPaymentForm(true)}>
+                          Add New Payment Method
+                        </Button>
+                      </div>
+                    ) : (
+                      paymentMethods.map((method) => (
+                        <div 
+                          key={method.id} 
+                          className={`border rounded-lg p-4 relative ${method.is_default ? 'border-primary bg-gray-50' : ''}`}
+                        >
+                          {method.is_default && (
+                            <div className="absolute top-2 right-2 bg-[#FFFAEB] text-[#FFC90B] text-xs px-2 py-0.5 rounded">
+                              Default Payment Method
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">Card Number</div>
+                              <div className="font-medium">
+                                •••• •••• •••• {method.card_number.slice(-4)}
+                                {method.card_type && (
+                                  <span className="ml-2 text-gray-500">({method.card_type})</span>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Cardholder Name</div>
+                              <div>{method.cardholder_name}</div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Expiry Date</div>
+                              <div>{method.expiry_date}</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 mt-4 pt-4 border-t">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => setEditPaymentId(method.id)}
+                            >
+                              Edit
+                            </Button>
+                            {!method.is_default && (
+                              <>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleUpdatePaymentMethod(method.id, formatPaymentMethodForForm({...method, is_default: true}))}
+                                >
+                                  Set as Default
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleDeletePaymentMethod(method.id)}
+                                >
+                                  Remove
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
             {/* Notification Settings Section */}
             {activeSection === "notifications" && (
               <div>
@@ -938,10 +1105,23 @@ const UserProfile = () => {
                   <h1 className="text-xl font-bold">Notification Settings</h1>
                 </div>
                 
-                <NotificationSettings 
-                  initialSettings={notificationSettings}
-                  onSave={handleUpdateNotificationSettings}
-                />
+                {notificationPrefsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                ) : (
+                  <NotificationSettings 
+                    initialSettings={notificationPrefs || {
+                      order_updates: true,
+                      promotions: true,
+                      new_arrivals: false,
+                      account_activity: true,
+                      email_notifications: true,
+                      sms_notifications: false,
+                    }}
+                    onSave={handleUpdateNotificationSettings}
+                  />
+                )}
               </div>
             )}
 
@@ -952,7 +1132,7 @@ const UserProfile = () => {
                   <h1 className="text-xl font-bold">My Vouchers</h1>
                 </div>
                 
-                <VoucherList vouchers={vouchers} />
+                <VoucherList vouchers={[]} /> {/* For now, keep vouchers empty - future enhancement */}
               </>
             )}
           </div>

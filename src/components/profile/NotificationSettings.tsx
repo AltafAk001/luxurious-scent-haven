@@ -1,145 +1,117 @@
 
-import React from "react";
-import { Switch } from "@/components/ui/switch";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Bell, Mail, MessageCircle } from "lucide-react";
-
-export interface UserNotificationPreferences {
-  orderUpdates: boolean;
-  promotions: boolean;
-  newArrivals: boolean;
-  accountActivity: boolean;
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-}
+import { Switch } from "@/components/ui/switch";
+import { UserNotificationPreferences } from "@/services/user.service";
+import { useToast } from "@/hooks/use-toast";
 
 interface NotificationSettingsProps {
   initialSettings: UserNotificationPreferences;
   onSave: (settings: UserNotificationPreferences) => void;
 }
 
-export const NotificationSettings: React.FC<NotificationSettingsProps> = ({ 
-  initialSettings, 
-  onSave 
-}) => {
-  const [settings, setSettings] = React.useState<UserNotificationPreferences>(initialSettings);
-
-  const handleToggle = (key: keyof UserNotificationPreferences) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
+export const NotificationSettings = ({ initialSettings, onSave }: NotificationSettingsProps) => {
+  const [settings, setSettings] = useState<UserNotificationPreferences>(initialSettings);
+  const { toast } = useToast();
 
   const handleSave = () => {
     onSave(settings);
+    toast({
+      title: "Settings Saved",
+      description: "Your notification settings have been updated.",
+    });
+  };
+
+  const handleChange = (key: keyof UserNotificationPreferences, value: boolean) => {
+    setSettings({
+      ...settings,
+      [key]: value
+    });
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium mb-4">Notification Settings</h2>
-        <p className="text-gray-500 text-sm mb-6">
-          Manage what notifications you receive from Nigedum
-        </p>
-
-        <div className="space-y-6">
-          <div>
-            <h3 className="font-medium mb-3 flex items-center gap-2">
-              <Bell size={18} />
-              <span>Push Notifications</span>
-            </h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="font-medium">Order Updates</div>
-                  <div className="text-sm text-gray-500">Receive updates about your orders</div>
-                </div>
-                <Switch 
-                  checked={settings.orderUpdates} 
-                  onCheckedChange={() => handleToggle('orderUpdates')} 
-                />
-              </div>
-
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="font-medium">Promotions & Offers</div>
-                  <div className="text-sm text-gray-500">Get notified about special deals and offers</div>
-                </div>
-                <Switch 
-                  checked={settings.promotions} 
-                  onCheckedChange={() => handleToggle('promotions')} 
-                />
-              </div>
-
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="font-medium">New Arrivals</div>
-                  <div className="text-sm text-gray-500">Be the first to know about new products</div>
-                </div>
-                <Switch 
-                  checked={settings.newArrivals} 
-                  onCheckedChange={() => handleToggle('newArrivals')} 
-                />
-              </div>
-
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="font-medium">Account Activity</div>
-                  <div className="text-sm text-gray-500">Get notified about account security and updates</div>
-                </div>
-                <Switch 
-                  checked={settings.accountActivity} 
-                  onCheckedChange={() => handleToggle('accountActivity')} 
-                />
-              </div>
+      <div className="space-y-4">
+        <h2 className="text-lg font-medium">Notification Preferences</h2>
+        
+        <div className="space-y-3 p-4 border rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium">Order Updates</div>
+              <div className="text-sm text-gray-500">Receive notifications about your orders</div>
             </div>
+            <Switch 
+              checked={settings.order_updates} 
+              onCheckedChange={(checked) => handleChange('order_updates', checked)} 
+            />
           </div>
-
-          <Separator />
-
-          <div>
-            <h3 className="font-medium mb-3 flex items-center gap-2">
-              <Mail size={18} />
-              <span>Email Notifications</span>
-            </h3>
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-medium">Email Notifications</div>
-                <div className="text-sm text-gray-500">Receive notifications via email</div>
-              </div>
-              <Switch 
-                checked={settings.emailNotifications} 
-                onCheckedChange={() => handleToggle('emailNotifications')} 
-              />
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium">Promotions</div>
+              <div className="text-sm text-gray-500">Receive notifications about sales and promotions</div>
             </div>
+            <Switch 
+              checked={settings.promotions} 
+              onCheckedChange={(checked) => handleChange('promotions', checked)} 
+            />
           </div>
-
-          <Separator />
-
-          <div>
-            <h3 className="font-medium mb-3 flex items-center gap-2">
-              <MessageCircle size={18} />
-              <span>SMS Notifications</span>
-            </h3>
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-medium">SMS Notifications</div>
-                <div className="text-sm text-gray-500">Receive notifications via SMS</div>
-              </div>
-              <Switch 
-                checked={settings.smsNotifications} 
-                onCheckedChange={() => handleToggle('smsNotifications')} 
-              />
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium">New Arrivals</div>
+              <div className="text-sm text-gray-500">Get updates when new products are available</div>
             </div>
+            <Switch 
+              checked={settings.new_arrivals} 
+              onCheckedChange={(checked) => handleChange('new_arrivals', checked)} 
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium">Account Activity</div>
+              <div className="text-sm text-gray-500">Get notified about important account activities</div>
+            </div>
+            <Switch 
+              checked={settings.account_activity} 
+              onCheckedChange={(checked) => handleChange('account_activity', checked)} 
+            />
           </div>
         </div>
       </div>
-
-      <div className="pt-4 flex justify-end">
-        <Button onClick={handleSave} variant="dark">
-          Save Changes
+      
+      <div className="space-y-4">
+        <h2 className="text-lg font-medium">Communication Channels</h2>
+        
+        <div className="space-y-3 p-4 border rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium">Email Notifications</div>
+              <div className="text-sm text-gray-500">Receive notifications via email</div>
+            </div>
+            <Switch 
+              checked={settings.email_notifications} 
+              onCheckedChange={(checked) => handleChange('email_notifications', checked)} 
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium">SMS Notifications</div>
+              <div className="text-sm text-gray-500">Receive notifications via SMS</div>
+            </div>
+            <Switch 
+              checked={settings.sms_notifications} 
+              onCheckedChange={(checked) => handleChange('sms_notifications', checked)} 
+            />
+          </div>
+        </div>
+      </div>
+      
+      <div className="pt-4">
+        <Button variant="dark" onClick={handleSave}>
+          Save Settings
         </Button>
       </div>
     </div>

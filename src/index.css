@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -101,4 +102,50 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+  
+  /* Add text alignment utility classes */
+  .text-left-align {
+    text-align: left;
+  }
+  
+  .text-right-align {
+    text-align: right;
+  }
+  
+  .text-center-align {
+    text-align: center;
+  }
+  
+  .text-justify-align {
+    text-align: justify;
+  }
 }
+
+/* Global Text Alignment Fixes */
+.product-description, 
+.product-details, 
+.address-form,
+.payment-form,
+.user-profile-section {
+  text-align: left;
+}
+
+/* Fix text alignment in forms */
+form label, 
+form .form-label {
+  display: block;
+  text-align: left;
+  margin-bottom: 0.5rem;
+}
+
+/* Add general text alignment rules */
+p, h1, h2, h3, h4, h5, h6 {
+  text-align: inherit;
+}
+
+/* Fix for lists */
+ul, ol {
+  text-align: left;
+  padding-left: 1.25rem;
+}
+

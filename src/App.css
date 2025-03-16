@@ -2,7 +2,6 @@
 #root {
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
   overflow-x: hidden; /* Prevent horizontal scroll in the root element */
 }
 
@@ -41,3 +40,29 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Text alignment fixes */
+.content-container {
+  text-align: left;
+}
+
+.center-text {
+  text-align: center;
+}
+
+.product-card-content {
+  text-align: left;
+}
+
+.footer-section {
+  text-align: left;
+}
+
+.footer-section .footer-title {
+  text-align: left;
+}
+
+.form-container form {
+  text-align: left;
+}
+

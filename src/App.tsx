@@ -15,31 +15,34 @@ import UserProfile from "./pages/UserProfile";
 import ProductListingPage from "./pages/ProductListingPage";
 import { Toaster } from "./components/ui/toaster";
 import { CartProvider } from "./contexts/CartContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { HelmetProvider } from "react-helmet-async";
 import "./App.css";
 
 function App() {
   return (
     <HelmetProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/checkout/payment" element={<CheckoutPayment />} />
-            <Route path="/order-confirmation" element={<OrderConfirmation />} />
-            <Route path="/order/:orderId" element={<OrderTracking />} />
-            <Route path="/user-profile" element={<UserProfile />} />
-            <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/products" element={<ProductListingPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </BrowserRouter>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/checkout/payment" element={<CheckoutPayment />} />
+              <Route path="/order-confirmation" element={<OrderConfirmation />} />
+              <Route path="/order/:orderId" element={<OrderTracking />} />
+              <Route path="/user-profile" element={<UserProfile />} />
+              <Route path="/product/:id" element={<ProductPage />} />
+              <Route path="/products" element={<ProductListingPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
     </HelmetProvider>
   );
 }
